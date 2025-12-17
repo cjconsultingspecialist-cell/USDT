@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="it"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Security Wallet&lt;/title&gt;</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Icone per iOS e Android (usano il nuovo logo della DApp) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="apple-touch-icon" href="https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/wallet_icon.jpg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="icon" href="https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/wallet_icon.jpg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="theme-color" content="#27ae60"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Libreria Ethers.js per la connessione Blockchain --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="cdnjs.cloudflare.com"&gt;&lt;/script&gt;</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-align: center; padding: 40px 20px; background: #f0f2f5; color: #1c1e21; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.card { background: white; padding: 40px; border-radius: 24px; display: inline-block; box-shadow: 0 12px 40px rgba(0,0,0,0.12); border: 1px solid #e1e4e8; max-width: 380px; width: 100%; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.app-title { font-size: 28px; font-weight: 800; color: #1a73e8; margin-bottom: 5px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.app-subtitle { font-size: 14px; color: #5f6368; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>img#tokenLogo { width: 110px; height: 110px; border-radius: 50%; margin-bottom: 15px; border: 4px solid #27ae60; padding: 4px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.price-tag { font-size: 18px; color: #27ae60; font-weight: 700; margin-bottom: 25px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.balance-container { background: #f8f9fa; padding: 20px; border-radius: 16px; margin-bottom: 30px; border: 1px solid #dee2e6; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.balance-label { font-size: 13px; color: #70757a; margin-bottom: 8px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#balance { font-size: 32px; font-weight: 700; margin: 0; color: #202124; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>button { width: 100%; padding: 16px; font-size: 18px; cursor: pointer; background: #1a73e8; color: white; border: none; border-radius: 12px; transition: all 0.2s ease; font-weight: 600; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>button:hover { background: #1557b0; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,115,232,0.3); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>button:active { transform: translateY(0); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.status-box { margin-top: 20px; padding: 10px; border-radius: 8px; font-size: 13px; color: #5f6368; background: #fff; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#walletAddress { font-family: monospace; color: #1a73e8; font-weight: 600; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="app-title"&gt;Security Wallet&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="app-subtitle"&gt;Asset Management&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Dati dinamici dal JSON --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;img id="tokenLogo" src="cjconsultingspecialist-cell.github.io" alt="Logo"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h2 id="tokenName" style="margin: 10px 0;"&gt;Tether USD&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="price-tag"&gt;Value: &lt;span id="tokenPrice"&gt;1.00 USD&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="balance-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="balance-label"&gt;DISPONIBILITÀ ATTUALE&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 id="balance"&gt;0.00 USDT&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button onclick="connectWallet()"&gt;Accedi con MetaMask&lt;/button&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="status-box"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Stato: &lt;span id="walletAddress"&gt;Wallet Disconnesso&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Configurazione URL Database JSON</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const jsonUrl = "raw.githubusercontent.com";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let contractAddress;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Funzione per caricare i dati estetici e tecnici dal database JSON</p>
+<p class="p1"><span class="Apple-converted-space">        </span>async function loadAppData() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const response = await fetch(jsonUrl);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!response.ok) throw new Error("Errore nel caricamento del database");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const data = await response.json();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('tokenName').innerText = data.name;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// document.getElementById('tokenLogo').src = data.logoURI; // Non usiamo più il logo del token qui</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if(data.extensions &amp;&amp; data.extensions.price_usd) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('tokenPrice').innerText = data.extensions.price_usd + " USD";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>contractAddress = data.address;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>console.log("DApp Pronta. Contratto collegato:", contractAddress);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (error) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>console.error("Errore Inizializzazione:", error);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('walletAddress').innerText = "Errore Database JSON";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Funzione per connettersi alla Blockchain Sepolia tramite MetaMask</p>
+<p class="p1"><span class="Apple-converted-space">        </span>async function connectWallet() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (window.ethereum) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const provider = new ethers.BrowserProvider(window.ethereum);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const accounts = await provider.send("eth_requestAccounts", []);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const signer = await provider.getSigner();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const userAddress = await signer.getAddress();</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const abi = ["function balanceOf(address) view returns (uint256)"];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const contract = new ethers.Contract(contractAddress, abi, provider);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const balance = await contract.balanceOf(userAddress);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const formattedBalance = Number(balance) / 1000000;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('balance').innerText = formattedBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + " USDT";</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>console.log("Connessione riuscita per l'utente:", userAddress);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} catch (err) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>console.error(err);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>alert("Connessione fallita. Assicurati di essere sulla rete Sepolia.");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>alert("MetaMask non rilevato. Per favore installa l'estensione o usa il browser di MetaMask su Mobile.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>loadAppData();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>

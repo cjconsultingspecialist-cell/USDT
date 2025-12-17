@@ -1,0 +1,8 @@
+{
+  "chainId": 11155111,
+  "address": "0xE7dF1Ed9DD95cA636F9597302D3B9593E0910E95",
+  "symbol": "USDT",
+  "name": "Tether USD",
+  "decimals": 6,
+  "logoURI": "https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/USDT.jpg"
+}

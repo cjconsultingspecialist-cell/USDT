@@ -9,8 +9,8 @@
   <link rel="icon" href="wallet_icon.jpg" />
   <meta name="theme-color" content="#27ae60" />
 
-  <!-- Libreria ethers.js (v6 stabile) -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <!-- Libreria web3.js per compatibilità app.js -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.3/dist/web3.min.js"></script>
 
   <style>
     body {
@@ -88,6 +88,7 @@
       border-radius: 12px;
       transition: all 0.2s ease;
       font-weight: 600;
+      margin-top: 10px;
     }
     button:hover {
       background: #1557b0;
@@ -107,6 +108,14 @@
       color: #1a73e8;
       font-weight: 600;
     }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -123,74 +132,29 @@
       <h2 id="balance">0.00 USDT</h2>
     </div>
 
+    <!-- Pulsanti principali -->
     <button id="connectButton">🔗 Connetti MetaMask</button>
+    <button id="balanceButton">💰 Mostra Saldo</button>
 
+    <!-- Sezione invio token -->
+    <div style="margin-top: 20px;">
+      <input id="recipient" type="text" placeholder="Indirizzo destinatario" />
+      <input id="amount" type="number" placeholder="Quantità da inviare" />
+      <button id="sendButton">📤 Invia Token</button>
+    </div>
+
+    <!-- Mostra indirizzo -->
+    <div style="margin-top: 20px;">
+      <button id="addressButton">📥 Mostra il mio indirizzo</button>
+    </div>
+
+    <!-- Stato wallet -->
     <div class="status-box">
       Stato: <span id="walletAddress">Wallet Disconnesso</span>
     </div>
   </div>
 
-  <script>
-    const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
-    const abi = [
-      "function balanceOf(address owner) view returns (uint256)",
-      "function decimals() view returns (uint8)"
-    ];
-
-    async function connectWallet() {
-      try {
-        if (typeof window.ethereum === "undefined") {
-          alert("🚫 MetaMask non rilevato.");
-          return;
-        }
-
-        // Chiedi il permesso a MetaMask — apre la finestra
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-        const user = accounts[0];
-
-        // Verifica che la rete sia Sepolia
-        const chainId = await window.ethereum.request({ method: "eth_chainId" });
-        if (chainId.toLowerCase() !== "0xaa36a7") {
-          alert("⚠️ Connettiti alla rete Sepolia su MetaMask e ricarica la pagina.");
-          return;
-        }
-
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const contract = new ethers.Contract(contractAddress, abi, provider);
-
-        // Legge saldo
-        const rawBalance = await contract.balanceOf(user);
-        const decimals = await contract.decimals();
-        const formattedBalance = Number(
-          ethers.formatUnits(rawBalance, decimals)
-        ).toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 6,
-        });
-
-        // Aggiorna interfaccia
-        document.getElementById(
-          "walletAddress"
-        ).innerText = `${user.slice(0, 6)}...${user.slice(-4)}`;
-        document.getElementById(
-          "balance"
-        ).innerText = `${formattedBalance} USDT`;
-
-        console.log("✅ MetaMask connesso:", user);
-      } catch (err) {
-        console.error("❌ Errore MetaMask:", err);
-        alert("Errore durante la connessione o lettura bilancio.");
-      }
-    }
-
-    // Collega evento click
-    window.addEventListener("DOMContentLoaded", () => {
-      document
-        .getElementById("connectButton")
-        .addEventListener("click", connectWallet);
-    });
-  </script>
+  <!-- Collegamento al tuo app.js -->
+  <script src="app.js"></script>
 </body>
 </html>

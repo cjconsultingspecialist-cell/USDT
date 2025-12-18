@@ -10,7 +10,7 @@
     <link rel="icon" href="raw.githubusercontent.com">
     <meta name="theme-color" content="#27ae60">
 
-    <!-- Libreria Ethers.js CORRETTA (Versione 6.13.2) -->
+    <!-- Libreria Ethers.js -->
     <script src="cdnjs.cloudflare.com"></script>
     
     <style>
@@ -36,7 +36,7 @@
         <div class="app-subtitle">Asset Management</div>
         
         <img id="tokenLogo" src="raw.githubusercontent.com" alt="Logo">
-        <h2 id="tokenName" style="margin: 10px 0;">Caricamento...</h2>
+        <h2 id="tokenName" style="margin: 10px 0;">Tether USDT</h2>
         <div class="price-tag">Value: <span id="tokenPrice">1.00 USD</span></div>
         
         <div class="balance-container">
@@ -52,65 +52,48 @@
     </div>
 
     <script>
-        // URL RAW del tuo file JSON
-        const jsonUrl = "raw.githubusercontent.com";
-        let contractAddress;
+        // DATI DEL PROGETTO INSERITI DIRETTAMENTE (per risolvere l'errore Database)
+        const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
+        const abi = ["function balanceOf(address owner) view returns (uint256)"];
 
-        async function loadAppData() {
-            try {
-                const response = await fetch(jsonUrl);
-                const data = await response.json();
-                
-                document.getElementById('tokenName').innerText = data.name;
-                document.getElementById('tokenLogo').src = data.logoURI;
-                
-                if(data.extensions && data.extensions.price_usd) {
-                    document.getElementById('tokenPrice').innerText = data.extensions.price_usd + " USD";
-                }
-                
-                contractAddress = data.address;
-                console.log("Contratto caricato:", contractAddress);
-            } catch (error) {
-                console.error("Errore JSON:", error);
-                document.getElementById('walletAddress').innerText = "Errore Database";
-            }
+        // Funzione per mostrare lo stato iniziale senza errori
+        function initializeUI() {
+            document.getElementById('walletAddress').innerText = "Inizializzato";
+            console.log("DApp inizializzata con indirizzo:", contractAddress);
         }
 
         async function connectWallet() {
             if (window.ethereum) {
                 try {
-                    // Controllo Rete Sepolia (Chain ID 0xaa36a7)
                     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                    if (chainId !== '0xaa36a7') {
+                    if (chainId !== '0xaa36a7') { // 0xaa36a7 è l'ID di Sepolia
                         alert("Per favore, connettiti alla rete Sepolia su MetaMask!");
                         return;
                     }
 
                     const provider = new ethers.BrowserProvider(window.ethereum);
                     const accounts = await provider.send("eth_requestAccounts", []);
-                    const userAddress = accounts[0];
+                    const userAddress = accounts[0]; // Prendi il primo account
                     
                     document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
 
-                    const abi = ["function balanceOf(address owner) view returns (uint256)"];
                     const contract = new ethers.Contract(contractAddress, abi, provider);
                     
                     const balance = await contract.balanceOf(userAddress);
                     
-                    // Formattazione a 6 decimali (Standard USDT)
                     const formattedBalance = ethers.formatUnits(balance, 6); 
                     document.getElementById('balance').innerText = parseFloat(formattedBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) + " USDT";
                     
                 } catch (err) {
                     console.error("Errore connessione:", err);
-                    alert("Errore durante la connessione. Verifica MetaMask.");
+                    alert("Errore durante la connessione. Controlla di essere su Sepolia.");
                 }
             } else {
                 alert("MetaMask non installato!");
             }
         }
 
-        loadAppData();
+        initializeUI();
     </script>
 </body>
 </html>

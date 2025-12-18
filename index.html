@@ -10,7 +10,7 @@
     <link rel="icon" href="raw.githubusercontent.com">
     <meta name="theme-color" content="#27ae60">
 
-    <!-- Libreria Ethers.js -->
+    <!-- Libreria Ethers.js CORRETTA -->
     <script src="cdnjs.cloudflare.com"></script>
     
     <style>
@@ -52,14 +52,12 @@
     </div>
 
     <script>
-        // DATI DEL PROGETTO INSERITI DIRETTAMENTE (per risolvere l'errore Database)
+        // DATI DEL PROGETTO INSERITI DIRETTAMENTE
         const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
         const abi = ["function balanceOf(address owner) view returns (uint256)"];
 
-        // Funzione per mostrare lo stato iniziale senza errori
         function initializeUI() {
             document.getElementById('walletAddress').innerText = "Inizializzato";
-            console.log("DApp inizializzata con indirizzo:", contractAddress);
         }
 
         async function connectWallet() {
@@ -73,7 +71,7 @@
 
                     const provider = new ethers.BrowserProvider(window.ethereum);
                     const accounts = await provider.send("eth_requestAccounts", []);
-                    const userAddress = accounts[0]; // Prendi il primo account
+                    const userAddress = accounts[0]; // Prendi il primo account corretto
                     
                     document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
 

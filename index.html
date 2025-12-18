@@ -1,54 +1,196 @@
-<script>
-  // === 🔧 CONFIGURAZIONE ===
-  const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D"; // tuo contratto Sepolia
-  const abi = [
-    "function balanceOf(address owner) view returns (uint256)",
-    "function decimals() view returns (uint8)",
-    "function symbol() view returns (string)"
-  ];
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security Wallet</title>
 
-  // === ⚙️ FUNZIONE DI CONNESSIONE ===
-  async function connectWallet() {
-    if (typeof window.ethereum === "undefined") {
-      alert("🚫 MetaMask non rilevato.");
-      return;
+  <!-- Icona -->
+  <link rel="icon" href="wallet_icon.jpg" />
+  <meta name="theme-color" content="#27ae60" />
+
+  <!-- Libreria ethers.js (v6 stabile) -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+      background: #f0f2f5;
+      color: #1c1e21;
     }
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 24px;
+      display: inline-block;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      border: 1px solid #e1e4e8;
+      max-width: 380px;
+      width: 100%;
+    }
+    .app-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1a73e8;
+      margin-bottom: 5px;
+    }
+    .app-subtitle {
+      font-size: 14px;
+      color: #5f6368;
+      margin-bottom: 25px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    img#tokenLogo {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      border: 4px solid #27ae60;
+      padding: 4px;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .price-tag {
+      font-size: 18px;
+      color: #27ae60;
+      font-weight: 700;
+      margin-bottom: 25px;
+    }
+    .balance-container {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 30px;
+      border: 1px solid #dee2e6;
+    }
+    .balance-label {
+      font-size: 13px;
+      color: #70757a;
+      margin-bottom: 8px;
+    }
+    #balance {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0;
+      color: #202124;
+    }
+    button {
+      width: 100%;
+      padding: 16px;
+      font-size: 18px;
+      cursor: pointer;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #1557b0;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    }
+    .status-box {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #5f6368;
+      background: #fff;
+    }
+    #walletAddress {
+      font-family: monospace;
+      color: #1a73e8;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="app-title">Security Wallet</div>
+    <div class="app-subtitle">Asset Management</div>
 
-    try {
-      // 🔸 Chiede esplicitamente accesso all'account → Mostra popup MetaMask
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const user = accounts[0];
+    <img id="tokenLogo" src="USDT.jpg" alt="Logo" />
+    <h2 id="tokenName" style="margin: 10px 0">Tether USDT</h2>
+    <div class="price-tag">Value: <span id="tokenPrice">1.00 USD</span></div>
 
-      // 🔹 Verifica rete (Sepolia)
-      const chainId = await window.ethereum.request({ method: "eth_chainId" });
-      if (chainId.toLowerCase() !== "0xaa36a7") {
-        alert("⚠️ Connettiti alla rete Sepolia su MetaMask e ricarica la pagina.");
-        return;
-      }
+    <div class="balance-container">
+      <div class="balance-label">DISPONIBILITÀ ATTUALE</div>
+      <h2 id="balance">0.00 USDT</h2>
+    </div>
 
-      // 🔹 Inizializza il provider Ethereum (ethers v6)
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(contractAddress, abi, provider);
+    <button id="connectButton">🔗 Connetti MetaMask</button>
 
-      // 🔹 Recupera e mostra saldo USDT
-      const rawBalance = await contract.balanceOf(user);
-      const decimals = await contract.decimals();
-      const formattedBalance = Number(ethers.formatUnits(rawBalance, decimals)).toLocaleString("en-US", {
-        minimumFractionDigits: 2, maximumFractionDigits: 6
-      });
+    <div class="status-box">
+      Stato: <span id="walletAddress">Wallet Disconnesso</span>
+    </div>
+  </div>
 
-      // 🔹 Aggiorna UI
-      document.getElementById("walletAddress").innerText = `${user.substring(0,6)}...${user.substring(38)}`;
-      document.getElementById("balance").innerText = `${formattedBalance} USDT`;
+  <script>
+    const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
+    const abi = [
+      "function balanceOf(address owner) view returns (uint256)",
+      "function decimals() view returns (uint8)"
+    ];
 
-      console.log("✅ MetaMask connesso:", user);
-    } catch (err) {
-      console.error("❌ Errore durante la connessione:", err);
-      if (err.code === 4001) {
-        alert("Richiesta di connessione a MetaMask rifiutata.");
-      } else {
+    async function connectWallet() {
+      try {
+        if (typeof window.ethereum === "undefined") {
+          alert("🚫 MetaMask non rilevato.");
+          return;
+        }
+
+        // Chiedi il permesso a MetaMask — apre la finestra
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        const user = accounts[0];
+
+        // Verifica che la rete sia Sepolia
+        const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        if (chainId.toLowerCase() !== "0xaa36a7") {
+          alert("⚠️ Connettiti alla rete Sepolia su MetaMask e ricarica la pagina.");
+          return;
+        }
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const contract = new ethers.Contract(contractAddress, abi, provider);
+
+        // Legge saldo
+        const rawBalance = await contract.balanceOf(user);
+        const decimals = await contract.decimals();
+        const formattedBalance = Number(
+          ethers.formatUnits(rawBalance, decimals)
+        ).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 6,
+        });
+
+        // Aggiorna interfaccia
+        document.getElementById(
+          "walletAddress"
+        ).innerText = `${user.slice(0, 6)}...${user.slice(-4)}`;
+        document.getElementById(
+          "balance"
+        ).innerText = `${formattedBalance} USDT`;
+
+        console.log("✅ MetaMask connesso:", user);
+      } catch (err) {
+        console.error("❌ Errore MetaMask:", err);
         alert("Errore durante la connessione o lettura bilancio.");
       }
     }
-  }
-</script>
+
+    // Collega evento click
+    window.addEventListener("DOMContentLoaded", () => {
+      document
+        .getElementById("connectButton")
+        .addEventListener("click", connectWallet);
+    });
+  </script>
+</body>
+</html>

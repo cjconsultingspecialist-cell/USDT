@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Wallet</title>
     
-    <!-- Icone per iOS e Android (Logo della DApp) -->
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/wallet_icon.jpg">
-    <link rel="icon" href="raw.https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/wallet_icon.jpg">
+    <!-- Icone per iOS e Android -->
+    <link rel="apple-touch-icon" href="raw.githubusercontent.com">
+    <link rel="icon" href="raw.githubusercontent.com">
     <meta name="theme-color" content="#27ae60">
 
-    <!-- Libreria Ethers.js per la connessione Blockchain -->
+    <!-- Libreria Ethers.js CORRETTA (Versione 6.13.2) -->
     <script src="cdnjs.cloudflare.com"></script>
     
     <style>
@@ -25,7 +25,6 @@
         #balance { font-size: 32px; font-weight: 700; margin: 0; color: #202124; }
         button { width: 100%; padding: 16px; font-size: 18px; cursor: pointer; background: #1a73e8; color: white; border: none; border-radius: 12px; transition: all 0.2s ease; font-weight: 600; }
         button:hover { background: #1557b0; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,115,232,0.3); }
-        button:active { transform: translateY(0); }
         .status-box { margin-top: 20px; padding: 10px; border-radius: 8px; font-size: 13px; color: #5f6368; background: #fff; }
         #walletAddress { font-family: monospace; color: #1a73e8; font-weight: 600; }
     </style>
@@ -36,8 +35,7 @@
         <div class="app-title">Security Wallet</div>
         <div class="app-subtitle">Asset Management</div>
         
-        <!-- Logo e Nome dinamici -->
-        <img id="tokenLogo" src="https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/USDT.jpg" alt="Logo">
+        <img id="tokenLogo" src="raw.githubusercontent.com" alt="Logo">
         <h2 id="tokenName" style="margin: 10px 0;">Caricamento...</h2>
         <div class="price-tag">Value: <span id="tokenPrice">1.00 USD</span></div>
         
@@ -54,15 +52,13 @@
     </div>
 
     <script>
-        // Configurazione URL Database JSON su GitHub
-        const jsonUrl = "https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/usdt.json";
+        // URL RAW del tuo file JSON
+        const jsonUrl = "raw.githubusercontent.com";
         let contractAddress;
 
-        // Caricamento dati dal file JSON
         async function loadAppData() {
             try {
                 const response = await fetch(jsonUrl);
-                if (!response.ok) throw new Error("Errore database");
                 const data = await response.json();
                 
                 document.getElementById('tokenName').innerText = data.name;
@@ -73,40 +69,44 @@
                 }
                 
                 contractAddress = data.address;
+                console.log("Contratto caricato:", contractAddress);
             } catch (error) {
-                console.error("Errore Inizializzazione:", error);
-                document.getElementById('walletAddress').innerText = "Errore Collegamento JSON";
+                console.error("Errore JSON:", error);
+                document.getElementById('walletAddress').innerText = "Errore Database";
             }
         }
 
-        // Connessione a MetaMask e lettura Saldo Blockchain
         async function connectWallet() {
             if (window.ethereum) {
                 try {
+                    // Controllo Rete Sepolia (Chain ID 0xaa36a7)
+                    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                    if (chainId !== '0xaa36a7') {
+                        alert("Per favore, connettiti alla rete Sepolia su MetaMask!");
+                        return;
+                    }
+
                     const provider = new ethers.BrowserProvider(window.ethereum);
                     const accounts = await provider.send("eth_requestAccounts", []);
-                    const signer = await provider.getSigner();
-                    const userAddress = await signer.getAddress();
+                    const userAddress = accounts[0];
                     
                     document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
 
-                    const abi = ["function balanceOf(address) view returns (uint256)"];
+                    const abi = ["function balanceOf(address owner) view returns (uint256)"];
                     const contract = new ethers.Contract(contractAddress, abi, provider);
                     
                     const balance = await contract.balanceOf(userAddress);
-
-// Usiamo il metodo ufficiale di Ethers per formattare i numeri grandi
-// Se il tuo token ha 18 decimali metti 18, se ne ha 6 metti 6
-const formattedBalance = ethers.formatUnits(balance, 6); 
-document.getElementById('balance').innerText = parseFloat(formattedBalance).toFixed(2) + " USDT";
-
+                    
+                    // Formattazione a 6 decimali (Standard USDT)
+                    const formattedBalance = ethers.formatUnits(balance, 6); 
+                    document.getElementById('balance').innerText = parseFloat(formattedBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) + " USDT";
                     
                 } catch (err) {
-                    console.error(err);
-                    alert("Errore: Assicurati di essere sulla rete Sepolia in MetaMask.");
+                    console.error("Errore connessione:", err);
+                    alert("Errore durante la connessione. Verifica MetaMask.");
                 }
             } else {
-                alert("MetaMask non rilevato!");
+                alert("MetaMask non installato!");
             }
         }
 

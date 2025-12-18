@@ -94,10 +94,12 @@
                     const contract = new ethers.Contract(contractAddress, abi, provider);
                     
                     const balance = await contract.balanceOf(userAddress);
-                    
-                    // Formattazione (dividiamo per 1.000.000 per i 6 decimali di USDT)
-                    const formattedBalance = Number(balance) / 1000000;
-                    document.getElementById('balance').innerText = formattedBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + " USDT";
+
+// Usiamo il metodo ufficiale di Ethers per formattare i numeri grandi
+// Se il tuo token ha 18 decimali metti 18, se ne ha 6 metti 6
+const formattedBalance = ethers.formatUnits(balance, 6); 
+document.getElementById('balance').innerText = parseFloat(formattedBalance).toFixed(2) + " USDT";
+
                     
                 } catch (err) {
                     console.error(err);

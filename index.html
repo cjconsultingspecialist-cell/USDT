@@ -9,7 +9,7 @@
   <link rel="icon" href="wallet_icon.jpg" />
   <meta name="theme-color" content="#27ae60" />
 
-  <!-- Libreria web3.js per compatibilità app.js -->
+  <!-- Libreria web3.js (compatibile con MetaMask e app.js) -->
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.3/dist/web3.min.js"></script>
 
   <style>
@@ -27,7 +27,7 @@
       display: inline-block;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       border: 1px solid #e1e4e8;
-      max-width: 380px;
+      max-width: 400px;
       width: 100%;
     }
     .app-title {
@@ -148,13 +148,18 @@
       <button id="addressButton">📥 Mostra il mio indirizzo</button>
     </div>
 
+    <!-- Aggiungi token nella wallet -->
+    <div style="margin-top: 20px;">
+      <button id="addTokenButton">🪙 Aggiungi token su MetaMask</button>
+    </div>
+
     <!-- Stato wallet -->
     <div class="status-box">
       Stato: <span id="walletAddress">Wallet Disconnesso</span>
     </div>
   </div>
 
-  <!-- Collegamento al tuo app.js -->
+  <!-- Collegamento al JS -->
   <script src="app.js"></script>
 </body>
 </html>

@@ -4,11 +4,11 @@ let account;
 let contract;
 
 // === CONFIGURAZIONE ===
-const contractAddress = "QUI_METTI_IL_TUO_INDIRIZZO_CONTRATTO"; // esempio: 0x1234...
-const tokenSymbol = "USDT";       // simbolo token
-const tokenDecimals = 6;          // decimali token
-const tokenImage = "USDT.jpg";    // percorso o URL immagine del token
-const networkId = "0xaa36a7";     // chain ID rete Sepolia
+const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D"; // ✅ tuo indirizzo token USDT su Sepolia
+const tokenSymbol = "USDT";        // simbolo del token
+const tokenDecimals = 6;           // decimali del token
+const tokenImage = "USDT.jpg";     // immagine da mostrare
+const networkId = "0xaa36a7";      // Chain ID di Sepolia
 
 // === 🔹 COLLEGA METAMASK ===
 async function connectWallet() {
@@ -21,7 +21,7 @@ async function connectWallet() {
 
     let chainId = await window.ethereum.request({ method: "eth_chainId" });
     if (chainId.toLowerCase() !== networkId) {
-      alert("⚠️ Seleziona 'Sepolia test network' su MetaMask e ricarica la pagina.");
+      alert("⚠️ Imposta 'Sepolia test network' su MetaMask e ricarica la pagina.");
       return;
     }
 
@@ -40,7 +40,7 @@ async function connectWallet() {
 
 // === 🔹 MOSTRA SALDO TOKEN ===
 async function getBalance() {
-  if (!contract || !account) return alert("Connetti prima MetaMask.");
+  if (!contract || !account) return alert("Collega e connetti prima il wallet.");
   try {
     const balance = await contract.methods.balanceOf(account).call();
     const decimals = await contract.methods.decimals().call();
@@ -81,7 +81,7 @@ async function sendTokens() {
 // === 🔹 MOSTRA IL TUO INDIRIZZO (RICEZIONE) ===
 function showAddress() {
   if (!account) return alert("Collega prima MetaMask.");
-  alert(`📬 Il tuo indirizzo per ricevere ${tokenSymbol} è: \n${account}`);
+  alert(`📬 Il tuo indirizzo per ricevere ${tokenSymbol} è:\n${account}`);
 }
 
 // === 🔹 AGGIUNGI TOKEN SU METAMASK ===

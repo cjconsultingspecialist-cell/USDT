@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Asset Wallet | Institutional Interface</title>
 
   <!-- PWA -->
   <link rel="manifest" href="/USDT/manifest.json">
-  <link rel="icon" href="/USDT/icon-192.png">
+  <link rel="icon" href="/USDT/wallet_icon.png">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -24,20 +23,16 @@
       --text: #0f172a;
       --muted: #64748b;
     }
-
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
       background: var(--bg);
-      color: var(--text);
       min-height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
     }
-
     .card {
       width: 100%;
       max-width: 420px;
@@ -47,7 +42,6 @@
       box-shadow: 0 25px 40px rgba(0,0,0,.08);
       text-align: center;
     }
-
     .brand {
       display: flex;
       align-items: center;
@@ -55,45 +49,45 @@
       gap: 12px;
       margin-bottom: 30px;
     }
-
     .brand img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      width: 42px;
+      height: 42px;
     }
-
     .brand span {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 800;
       color: var(--primary);
     }
-
     .balance-box {
       background: #f1f5f9;
       border-radius: 18px;
       padding: 28px;
       margin-bottom: 25px;
     }
-
     .label {
       font-size: 12px;
       font-weight: 600;
       color: var(--muted);
-      text-transform: uppercase;
       margin-bottom: 8px;
+      text-transform: uppercase;
     }
-
     #balance {
       font-size: 38px;
       font-weight: 800;
     }
-
     #usdValue {
       font-size: 14px;
       color: var(--muted);
       margin-top: 6px;
     }
-
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      margin-bottom: 14px;
+      font-size: 15px;
+    }
     button {
       width: 100%;
       padding: 16px;
@@ -103,35 +97,22 @@
       border: none;
       cursor: pointer;
     }
-
     .btn-primary {
       background: var(--primary);
-      color: white;
+      color: #fff;
       margin-bottom: 12px;
     }
-
     .btn-secondary {
       background: #e2e8f0;
       color: var(--text);
     }
-
-    input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
-
-    .hidden { display: none; }
   </style>
 </head>
 
 <body>
   <div class="card">
     <div class="brand">
-      <img src="/USDT/icon-192.png" alt="USDT">
+      <img src="/USDT/wallet_icon.png" alt="USDT">
       <span>USDT</span>
     </div>
 
@@ -141,16 +122,13 @@
       <div id="usdValue">$0.00 USD</div>
     </div>
 
-    <button id="connectBtn" class="btn-primary">Connect Wallet</button>
+    <input id="to" placeholder="Recipient address">
+    <input id="amount" placeholder="Amount">
 
-    <div id="transferBox" class="hidden">
-      <input id="to" placeholder="Recipient address">
-      <input id="amount" placeholder="Amount">
-      <button id="sendBtn" class="btn-primary">Send</button>
-      <button id="disconnectBtn" class="btn-secondary">Disconnect</button>
-    </div>
+    <button class="btn-primary" onclick="send()">Send</button>
+    <button class="btn-secondary" onclick="disconnect()">Disconnect</button>
   </div>
 
-  <script src="./app.js"></script>
+  <script src="/USDT/app.js"></script>
 </body>
 </html>

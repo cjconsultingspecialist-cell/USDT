@@ -6,14 +6,11 @@
   <title>Tether Security Pro | Educational v3</title>
 
   <!-- Google Fonts -->
-  <link href="fonts.googleapis.com" rel="stylesheet">
-  
-  <!-- Librerie Base -->
-  <script src="cdn.jsdelivr.net"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
 
   <!-- WalletConnect AppKit (Connessione Universale 2025) -->
   <script type="module">
-    import { createAppKit } from 'cdn.jsdelivr.net'
+    import { createAppKit } from 'https://cdn.jsdelivr.net/npm/@walletconnect/appkit@1.0.0/dist/index.modern.js';
 
     // --- CONFIGURAZIONE PROFESSIONALE ---
     const projectId = '6985cbdbf144508ef45d6e99499296d2'; // <--- IL TUO ID INSERITO QUI
@@ -23,7 +20,7 @@
       name: 'Sepolia',
       currency: 'ETH',
       explorerUrl: 'https://sepolia.etherscan.io',
-      rpcUrl: 'rpc.ankr.com'
+      rpcUrl: 'https://rpc.ankr.com/sepolia'
     }];
 
     const modal = createAppKit({
@@ -158,8 +155,8 @@
     </div>
 
     <div class="card-body">
-      <!-- Il logo punta all'immagine ufficiale per realismo -->
-      <img id="tokenLogo" src="cryptologos.cc" alt="USDT">
+      <!-- Logo ufficiale Tether -->
+      <img id="tokenLogo" src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT" />
       <h2 id="tokenName">Tether USDT</h2>
       <div class="price-tag">Live Price: <span id="tokenPrice">$1.00 USD</span></div>
 
@@ -168,30 +165,14 @@
         <h2 id="balance">0.00 USDT</h2>
       </div>
 
-      <!-- Pulsante Universale (MetaMask, Trust, Coinbase, QR Code) -->
-      <button onclick="openConnectModal()" class="btn btn-primary">🔗 Connetti Wallet</button>
-      
-      <div id="transferSection" style="margin-top:25px;">
-        <input id="recipient" type="text" placeholder="Indirizzo Destinatario (0x...)">
-        <input id="amount" type="number" placeholder="Quantità da inviare">
-        <button id="sendButton" class="btn btn-primary">📤 Invia USDT</button>
-      </div>
-
-      <button id="addTokenButton" class="btn btn-outline" style="margin-top:20px;">🪙 Verifica Token nel Wallet</button>
+      <button class="btn btn-primary" onclick="openConnectModal()">Connect Wallet</button>
     </div>
 
-    <div class="footer-status">
-      <div id="statusContainer">
-        <span id="statusLight"></span> 
-        <span id="statusText">Disconnesso</span>
-      </div>
-      <div id="walletAddress">In attesa di autorizzazione...</div>
+    <div class="footer-status" id="footerStatus">
+      <span id="statusLight"></span>
+      <span id="walletAddress">Not connected</span>
     </div>
   </div>
 
-  <div id="snackbar" style="visibility:hidden;min-width:250px;background:#323232;color:#fff;text-align:center;border-radius:10px;padding:14px;position:fixed;left:50%;bottom:30px;transform:translateX(-50%);z-index:9999;font-size:15px;"></div>
-
-  <!-- Carica app.js come modulo, essenziale per il funzionamento -->
-  <script type="module" src="app.js"></script>
 </body>
 </html>

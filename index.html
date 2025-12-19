@@ -3,123 +3,194 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Security Wallet Pro v3</title>
+  <title>Tether Security Pro | Educational v3</title>
 
-  <!-- Manifest PWA -->
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#1a73e8" />
+  <!-- Google Fonts -->
+  <link href="fonts.googleapis.com" rel="stylesheet">
+  
+  <!-- Librerie Base -->
+  <script src="cdn.jsdelivr.net"></script>
+  <script src="cdn.jsdelivr.net"></script>
 
-  <!-- Icone PWA -->
-  <link rel="apple-touch-icon" href="wallet_icon.jpg" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Security Wallet Pro" />
+  <!-- WalletConnect AppKit (Connessione Universale 2025) -->
+  <script type="module">
+    import { createAppKit } from 'cdn.jsdelivr.net'
 
-  <!-- Librerie -->
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.3/dist/web3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    // --- CONFIGURAZIONE PROFESSIONALE ---
+    const projectId = 'INSERISCI_QUI_IL_TUO_PROJECT_ID'; // <--- IMPORTANTE: Inserisci il tuo ID
+
+    const networks = [{
+      id: 'eip155:11155111',
+      name: 'Sepolia',
+      currency: 'ETH',
+      explorerUrl: 'https://sepolia.etherscan.io',
+      rpcUrl: 'rpc.ankr.com'
+    }];
+
+    const modal = createAppKit({
+      adapters: [], 
+      networks,
+      projectId,
+      features: { analytics: true, email: false, social: false },
+      themeMode: 'light',
+      themeVariables: {
+        '--w3m-accent': '#26A17B', // Colore Tether
+        '--w3m-border-radius-master': '1px',
+        '--w3m-z-index': 9999
+      }
+    });
+
+    // Funzione globale per aprire il selettore di wallet
+    window.openConnectModal = async () => {
+      await modal.open();
+    };
+  </script>
 
   <style>
+    :root {
+      --primary-color: #26A17B;
+      --secondary-color: #1a73e8;
+      --bg-gradient: linear-gradient(180deg, #f0f4f8 0%, #d9e2ec 100%);
+      --card-bg: #ffffff;
+      --text-main: #102a43;
+      --text-sub: #627d98;
+    }
+
     body {
-      font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      text-align:center;padding:40px 20px;
-      background:linear-gradient(135deg,#f3f5f7 0%,#dfe9f3 100%);
-      color:#1c1e21;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
     }
-    .card{
-      background:white;padding:40px;border-radius:26px;
-      display:inline-block;box-shadow:0 20px 40px rgba(0,0,0,0.15);
-      border:1px solid #e5e7eb;max-width:440px;width:100%;
+
+    .card {
+      background: var(--card-bg);
+      max-width: 420px;
+      width: 100%;
+      border-radius: 30px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.5);
     }
-    .app-title{font-size:30px;font-weight:900;color:#1a73e8;margin-bottom:5px;}
-    .app-subtitle{font-size:14px;color:#5f6368;margin-bottom:25px;text-transform:uppercase;}
-    img#tokenLogo{
-      width:115px;height:115px;border-radius:50%;
-      margin-bottom:15px;border:5px solid #27ae60;padding:6px;background:#fff;
-      box-shadow:0 6px 14px rgba(0,0,0,0.1);
+
+    .card-header {
+      background: #f8fafc;
+      padding: 30px 20px;
+      text-align: center;
+      border-bottom: 1px solid #f1f5f9;
     }
-    .price-tag{font-size:18px;color:#27ae60;font-weight:700;margin-bottom:25px;}
-    .balance-container{
-      background:#f8f9fa;padding:20px;border-radius:20px;margin-bottom:25px;
-      border:1px solid #dee2e6;box-shadow:inset 0 2px 6px rgba(0,0,0,0.08);
+
+    .app-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-main); margin: 0; }
+    .app-subtitle { font-size: 11px; color: var(--secondary-color); font-weight: 700; text-transform: uppercase; margin-top: 5px; letter-spacing: 1px; }
+
+    .card-body { padding: 30px; text-align: center; }
+
+    #tokenLogo {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      box-shadow: 0 10px 20px rgba(38, 161, 123, 0.2);
+      margin-bottom: 15px;
     }
-    .balance-label{font-size:13px;color:#70757a;margin-bottom:8px;font-weight:600;}
-    #balance{font-size:33px;font-weight:800;margin:0;color:#202124;}
-    canvas{margin-top:15px;max-width:300px;}
-    button{
-      width:100%;padding:16px;font-size:17px;cursor:pointer;
-      border:none;border-radius:14px;transition:all 0.25s ease;font-weight:600;
-      background:linear-gradient(145deg,#1a73e8,#1665c1);color:white;
-      box-shadow:0 5px 10px rgba(26,115,232,0.3);margin-top:12px;
+
+    #tokenName { font-size: 24px; margin: 10px 0 5px 0; }
+    .price-tag { font-size: 16px; color: var(--primary-color); font-weight: 600; margin-bottom: 25px; }
+
+    .balance-box {
+      background: #f1f5f9;
+      padding: 25px;
+      border-radius: 24px;
+      margin-bottom: 20px;
     }
-    button:hover{transform:translateY(-2px);
-      box-shadow:0 8px 18px rgba(26,115,232,0.4);}
-    input{
-      width:100%;padding:12px;margin-bottom:10px;border-radius:10px;
-      border:1px solid #ccc;font-size:15px;text-align:left;
-      box-shadow:inset 0 2px 5px rgba(0,0,0,0.06);
+    .balance-label { font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 10px; }
+    #balance { font-size: 36px; font-weight: 800; color: var(--text-main); margin: 0; }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      border: 1.5px solid #d1d5db;
+      box-sizing: border-box;
+      font-size: 14px;
     }
-    .status-box{margin-top:20px;padding:14px;border-radius:10px;
-      font-size:14px;background:#f9fbfd;font-weight:600;
-      border:1px solid #e1e4e8;box-shadow:inset 0 0 4px rgba(0,0,0,0.05);}
-    #walletAddress{font-family:monospace;display:block;margin-top:4px;color:#1a73e8;}
-    #statusLight{display:inline-block;color:white;font-weight:bold;margin-top:10px;
-      padding:5px 12px;border-radius:8px;font-size:13px;background-color:#e74c3c;}
-    #snackbar{visibility:hidden;min-width:250px;background:#323232;color:#fff;
-      text-align:center;border-radius:10px;padding:14px;position:fixed;
-      left:50%;bottom:30px;transform:translateX(-50%);z-index:9999;font-size:15px;}
-    #snackbar.show{visibility:visible;animation:fadein 0.5s,fadeout 0.5s 2.5s;}
-    @keyframes fadein{from{bottom:0;opacity:0;}to{bottom:30px;opacity:1;}}
-    @keyframes fadeout{from{bottom:30px;opacity:1;}to{bottom:0;opacity:0;}}
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    .btn-primary { background: var(--primary-color); color: white; }
+    .btn-primary:hover { background: #1e8565; transform: translateY(-2px); }
+    .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: var(--text-sub); }
+
+    .footer-status {
+      padding: 20px;
+      background: #f8fafc;
+      font-size: 12px;
+      border-top: 1px solid #f1f5f9;
+    }
+    #statusLight {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      background: #ef4444;
+    }
+    .connected #statusLight { background: #22c55e; }
+    #walletAddress { font-family: monospace; color: var(--secondary-color); font-weight: 600; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="app-title">Security Wallet Pro v3</div>
-    <div class="app-subtitle">Installabile come App Mobile</div>
 
-    <img id="tokenLogo" src="USDT.jpg" alt="Token Logo" />
-    <h2 id="tokenName">Tether USDT</h2>
-    <div class="price-tag">Value: <span id="tokenPrice">1.00 USD</span></div>
-
-    <div class="balance-container">
-      <div class="balance-label">DISPONIBILITÀ ATTUALE</div>
-      <h2 id="balance">0.00 USDT</h2>
-      <canvas id="chartBalance"></canvas>
+  <div class="card" id="mainCard">
+    <div class="card-header">
+      <div class="app-title">Security Wallet Pro</div>
+      <div class="app-subtitle">Educational Verification Tool</div>
     </div>
 
-    <button id="connectButton">🔗 Connetti MetaMask</button>
-    <button id="balanceButton">💰 Mostra Saldo</button>
+    <div class="card-body">
+      <!-- Il logo punta all'immagine ufficiale per realismo -->
+      <img id="tokenLogo" src="cryptologos.cc" alt="USDT">
+      <h2 id="tokenName">Tether USDT</h2>
+      <div class="price-tag">Live Price: <span id="tokenPrice">$1.00 USD</span></div>
 
-    <div style="margin-top:20px;">
-      <input id="recipient" type="text" placeholder="Indirizzo destinatario" />
-      <input id="amount" type="number" placeholder="Quantità da inviare" />
-      <button id="sendButton">📤 Invia Token</button>
+      <div class="balance-box">
+        <div class="balance-label">AVAILABLE BALANCE</div>
+        <h2 id="balance">0.00 USDT</h2>
+      </div>
+
+      <!-- Pulsante Universale (MetaMask, Trust, Coinbase, QR Code) -->
+      <button onclick="openConnectModal()" class="btn btn-primary">🔗 Connetti Wallet</button>
+      
+      <div id="transferSection" style="margin-top:25px;">
+        <input id="recipient" type="text" placeholder="Indirizzo Destinatario (0x...)">
+        <input id="amount" type="number" placeholder="Quantità da inviare">
+        <button id="sendButton" class="btn btn-primary">📤 Invia USDT</button>
+      </div>
+
+      <button id="addTokenButton" class="btn btn-outline" style="margin-top:20px;">🪙 Verifica Token nel Wallet</button>
     </div>
 
-    <div style="margin-top:20px;">
-      <button id="addressButton">📥 Mostra il mio indirizzo</button>
-      <button id="addTokenButton">🪙 Aggiungi token su MetaMask</button>
-    </div>
-
-    <div class="status-box">
-      Stato Wallet:
-      <span id="walletAddress">Wallet Disconnesso</span><br />
-      <div id="statusLight">● Disconnesso</div>
+    <div class="footer-status">
+      <div id="statusContainer">
+        <span id="statusLight"></span> 
+        <span id="statusText">Disconnesso</span>
+      </div>
+      <div id="walletAddress">In attesa di autorizzazione...</div>
     </div>
   </div>
 
-  <div id="snackbar"></div>
-
-  <!-- Service Worker Registration -->
-  <script>
-    if("serviceWorker" in navigator){
-      navigator.serviceWorker.register("service-worker.js")
-      .then(()=>console.log("Service Worker registrato"))
-      .catch(e=>console.error("SW errore:",e));
-    }
-  </script>
-
+  <!-- Il tuo script app.js gestirà la logica dei saldi e dei trasferimenti -->
   <script src="app.js"></script>
 </body>
 </html>

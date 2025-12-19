@@ -1,22 +1,11 @@
 {
-  "short_name": "My App",
-  "name": "My Awesome Application",
-  "icons": [
-    {
-      "src": "/images/icon-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "/images/icon-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ],
-  "start_url": "/index.html",
+  "short_name": "Tether USD",
+  "name": "Tether USD Institutional Wallet",
+  "icons":,
+  "start_url": "/USDT/index.html",
   "background_color": "#ffffff",
   "display": "standalone",
-  "scope": "/",
-  "theme_color": "#000000",
-  "description": "A description of my application."
+  "scope": "/USDT/",
+  "theme_color": "#009393",
+  "description": "Enterprise asset management interface for stablecoin operations."
 }

@@ -1,80 +1,56 @@
-import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.esm.min.js';
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-// Indirizzo contratto USDT su Sepolia (esempio reale)
-const USDT_ADDRESS = '0x3e7d1eab13ad0104d2750b8863b489d65364e32d';
-
-// ABI minima ERC20 per balanceOf e decimals
-const ERC20_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function decimals() view returns (uint8)"
-];
-
-// Riferimenti DOM
-const balanceEl = document.getElementById('balance');
-const walletAddressEl = document.getElementById('walletAddress');
-const statusLightEl = document.getElementById('statusLight');
-const tokenPriceEl = document.getElementById('tokenPrice');
-const mainCardEl = document.getElementById('mainCard');
-
-let provider;
-let signer;
-let tokenContract;
-
-// Funzione per formattare indirizzo wallet (es. 0x1234...abcd)
-function formatAddress(address) {
-  return address.slice(0, 6) + '...' + address.slice(-4);
-}
-
-// Aggiorna UI saldo token
-async function updateBalance(address) {
-  try {
-    const rawBalance = await tokenContract.balanceOf(address);
-    const decimals = await tokenContract.decimals();
-    const formatted = ethers.formatUnits(rawBalance, decimals);
-    balanceEl.textContent = `${formatted} USDT`;
-  } catch (error) {
-    console.error('Errore nel recupero saldo:', error);
-    balanceEl.textContent = 'Errore';
-  }
-}
-
-// Aggiorna prezzo (qui fisso 1$ per USDT, ma puoi integrare API CoinGecko)
-function updatePrice() {
-  tokenPriceEl.textContent = '$1.00 USD';
-}
-
-// Gestione connessione WalletConnect (usiamo la finestra modale già definita)
-window.openConnectModal = async () => {
-  try {
-    await modal.open();
-
-    // Ottieni provider da WalletConnect
-    provider = new ethers.BrowserProvider(modal.getProvider());
-
-    // Prendi signer e indirizzo wallet
-    signer = await provider.getSigner();
-    const address = await signer.getAddress();
-
-    // Imposta contratto token
-    tokenContract = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, provider);
-
-    // Aggiorna UI
-    walletAddressEl.textContent = formatAddress(address);
-    statusLightEl.style.backgroundColor = '#22c55e'; // verde connesso
-    mainCardEl.classList.add('connected');
-
-    // Mostra saldo token
-    await updateBalance(address);
-
-    // Aggiorna prezzo
-    updatePrice();
-
-    // Chiudi modale (se vuoi)
-    await modal.close();
-  } catch (err) {
-    console.error('Connessione wallet fallita:', err);
-    walletAddressEl.textContent = 'Connessione fallita';
-    statusLightEl.style.backgroundColor = '#ef4444'; // rosso errore
-    mainCardEl.classList.remove('connected');
-  }
-};
+\f0\fs24 \cf0 // service-worker.js \'96 Service\uc0\u8239 Worker\u8239 base\u8239 per\u8239 Security\u8239 Wallet\u8239 Pro\
+// Permette caching\uc0\u8239 base\u8239 e\u8239 installazione\u8239 PWA\u8239 offline\u8239 light\
+\
+const CACHE_NAME = "wallet-pro-cache-v1";\
+\
+// Elenco dei file da mantenere nella cache\
+const ASSETS = [\
+  "./",\
+  "./index.html",\
+  "./app.js",\
+  "./usdt.json",\
+  "./wallet_icon.jpg",\
+  "./USDT.jpg",\
+  "./manifest.json"\
+];\
+\
+// Installazione del service worker (aggiunge file alla cache)\
+self.addEventListener("install", (event) => \{\
+  console.log("\uc0\u55357 \u56510 \u8239 SW\u8239 installato");\
+  event.waitUntil(\
+    caches.open(CACHE_NAME)\
+      .then((cache) => cache.addAll(ASSETS))\
+      .then(() => self.skipWaiting())\
+  );\
+\});\
+\
+// Intercetta le richieste della DApp e prova a rispondere dalla cache\
+self.addEventListener("fetch", (event) => \{\
+  event.respondWith(\
+    caches.match(event.request).then((response) => \{\
+      // Se c'\'e8 un file in cache lo restituiamo, altrimenti andiamo in rete\
+      return response || fetch(event.request);\
+    \})\
+  );\
+\});\
+\
+// Attivazione: rimuove vecchie versioni della cache\
+self.addEventListener("activate", (event) => \{\
+  console.log("\uc0\u9881 \u65039 \u8239 SW\u8239 attivato");\
+  event.waitUntil(\
+    caches.keys().then((keys) =>\
+      Promise.all(\
+        keys.filter((key) => key !== CACHE_NAME)\
+            .map((key) => caches.delete(key))\
+      )\
+    )\
+  );\
+  self.clients.claim();\
+\});}

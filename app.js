@@ -13,7 +13,7 @@ const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 const tokenSymbol = "USDT-EDU"; 
 const tokenDecimals = 6; 
 const tokenImageURL = "cryptologos.cc";
-const sepoliaChainId = '11155111'; // Sepolia Chain ID in decimale (per verifica)
+const sepoliaChainId = '11155111'; 
 
 // === 🔹 SNACKBAR (Notifiche) ===
 function showSnackbar(msg, color = "#323232") {
@@ -27,15 +27,12 @@ function showSnackbar(msg, color = "#323232") {
 
 // === 🔹 GESTIONE CONNESSIONE MODULO UNIVERSALE ===
 
-// Il pulsante HTML ora chiama la funzione importata openConnectModal()
-
-// Sottoscriviti agli eventi di connessione di AppKit
 subscribeToConnect(async ({ detail }) => {
     const provider = detail.provider;
     web3Instance = new Web3(provider);
 
     const acc = await web3Instance.eth.getAccounts();
-    account = acc[0]; // Prendi solo il primo account
+    account = acc; 
 
     const chainId = await web3Instance.eth.getChainId();
     if (chainId.toString() !== sepoliaChainId) { 
@@ -56,7 +53,6 @@ subscribeToConnect(async ({ detail }) => {
     }
 });
 
-// Sottoscriviti all'evento di disconnessione
 subscribeToDisconnect(() => {
     account = null;
     updateStatus(false);
@@ -74,7 +70,6 @@ async function refreshBalance() {
     const tokenBal = Number(balance) / 10**tokenDecimals;
 
     document.getElementById("balance").innerText = `${tokenBal.toFixed(4)} ${tokenSymbol}`;
-    // Aggiunto: Simula il prezzo fisso a 1 USD
     document.getElementById("tokenPrice").innerText = "$1.00 USD"; 
 
   } catch (e) {
@@ -94,7 +89,6 @@ async function sendTokens() {
     const val = (parseFloat(amount) * 10**tokenDecimals).toString();
     showSnackbar("⏳ Invio in corso...", "#3498db");
     
-    // Usa il provider universale per inviare la transazione
     const tx = await contract.methods.transfer(to, val).send({ from: account });
     console.log(tx);
     
@@ -108,7 +102,6 @@ async function sendTokens() {
 
 // === 🔹 AGGIUNGI TOKEN (Funzione Didattica per il Logo) ===
 async function addToken() {
-  // window.ethereum è ancora necessario per usare wallet_watchAsset
   if (!window.ethereum || !account) return showSnackbar("Connetti prima il wallet", "#f39c12");
 
   try {
@@ -152,14 +145,11 @@ function updateStatus(isConnected) {
 
 // === 🔹 ASSOCIAZIONI PULSANTI ===
 window.addEventListener("DOMContentLoaded", () => {
-  // Associa gli altri pulsanti
   document.getElementById("sendButton").addEventListener("click", sendTokens);
   document.getElementById("addTokenButton").addEventListener("click", addToken);
-
   updateStatus(false);
 });
 
-// BONUS: Ricarica la pagina per garantire che tutto si re-inizializzi correttamente ai cambi di rete/account
 if (window.ethereum) {
     window.ethereum.on("accountsChanged", () => location.reload());
     window.ethereum.on("chainChanged", () => location.reload());

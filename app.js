@@ -1,18 +1,19 @@
-// app.js – Security Wallet Pro v3 Universale e Professionale
+// app.js – Security Wallet Pro v3 Universale e Professionale (Come Modulo ES6)
+
+// Importa le funzioni necessarie per la connessione universale
+import { openConnectModal, subscribeToConnect, subscribeToDisconnect } from 'cdn.jsdelivr.net';
 
 let account;
 let contract;
 let autoRefreshInterval;
-let chart;
-let web3Instance; // Useremo questa per Web3
+let web3Instance; 
 
 // === CONFIGURAZIONE ===
-// Assicurati che l'indirizzo sia corretto per la tua deploy su Sepolia
 const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D"; 
-const tokenSymbol = "USDT-EDU"; // Simbolo didattico
+const tokenSymbol = "USDT-EDU"; 
 const tokenDecimals = 6; 
 const tokenImageURL = "cryptologos.cc";
-const networkId = "0xaa36a7"; // Sepolia Chain ID (hex)
+const sepoliaChainId = '11155111'; // Sepolia Chain ID in decimale (per verifica)
 
 // === 🔹 SNACKBAR (Notifiche) ===
 function showSnackbar(msg, color = "#323232") {
@@ -24,21 +25,20 @@ function showSnackbar(msg, color = "#323232") {
   setTimeout(() => s.className = s.className.replace("show", ""), 3000);
 }
 
-// === 🔹 CONNESSIONE UNIVERSALE (EIP-6963 + WalletConnect) ===
-// Il pulsante di connessione è gestito da index.html tramite openConnectModal()
+// === 🔹 GESTIONE CONNESSIONE MODULO UNIVERSALE ===
 
-// Ascolta l'evento che AppKit/WalletConnect emette quando un utente si connette
-window.addEventListener('modal:connect', async ({ detail }) => {
+// Il pulsante HTML ora chiama la funzione importata openConnectModal()
+
+// Sottoscriviti agli eventi di connessione di AppKit
+subscribeToConnect(async ({ detail }) => {
     const provider = detail.provider;
     web3Instance = new Web3(provider);
 
     const acc = await web3Instance.eth.getAccounts();
-    // Prendi solo il primo account
-    account = acc[0]; 
+    account = acc[0]; // Prendi solo il primo account
 
     const chainId = await web3Instance.eth.getChainId();
-    // 11155111 è Sepolia in decimale
-    if (chainId.toString() !== '11155111') { 
+    if (chainId.toString() !== sepoliaChainId) { 
         showSnackbar("⚠️ Cambia rete in Sepolia!", "#f39c12");
         updateStatus(false);
         return;
@@ -56,8 +56,8 @@ window.addEventListener('modal:connect', async ({ detail }) => {
     }
 });
 
-// Ascolta l'evento di disconnessione
-window.addEventListener('modal:disconnect', () => {
+// Sottoscriviti all'evento di disconnessione
+subscribeToDisconnect(() => {
     account = null;
     updateStatus(false);
     showSnackbar("Disconnesso da WalletConnect", "#e74c3c");
@@ -66,16 +66,15 @@ window.addEventListener('modal:disconnect', () => {
 });
 
 
-// === 🔹 REFRESH SALDO + GRAFICO ===
+// === 🔹 REFRESH SALDO + PREZZO FITTIZIO ===
 async function refreshBalance() {
   if (!contract || !account || !web3Instance) return;
   try {
     const balance = await contract.methods.balanceOf(account).call();
     const tokenBal = Number(balance) / 10**tokenDecimals;
 
-    // Aggiorna l'interfaccia con la nuova grafica
     document.getElementById("balance").innerText = `${tokenBal.toFixed(4)} ${tokenSymbol}`;
-    // Simula il prezzo fisso a 1 USD
+    // Aggiunto: Simula il prezzo fisso a 1 USD
     document.getElementById("tokenPrice").innerText = "$1.00 USD"; 
 
   } catch (e) {
@@ -95,6 +94,7 @@ async function sendTokens() {
     const val = (parseFloat(amount) * 10**tokenDecimals).toString();
     showSnackbar("⏳ Invio in corso...", "#3498db");
     
+    // Usa il provider universale per inviare la transazione
     const tx = await contract.methods.transfer(to, val).send({ from: account });
     console.log(tx);
     
@@ -147,14 +147,11 @@ function updateStatus(isConnected) {
         statusText.innerText = 'Disconnesso';
         walletAddressDisplay.innerText = 'In attesa di autorizzazione...';
         document.getElementById("balance").innerText = '0.00 USDT';
-        document.getElementById("tokenPrice").innerText = "$1.00 USD";
     }
 }
 
 // === 🔹 ASSOCIAZIONI PULSANTI ===
 window.addEventListener("DOMContentLoaded", () => {
-  // Il pulsante di connessione è gestito direttamente nell'HTML ora con onclick="openConnectModal()"
-  
   // Associa gli altri pulsanti
   document.getElementById("sendButton").addEventListener("click", sendTokens);
   document.getElementById("addTokenButton").addEventListener("click", addToken);
@@ -162,8 +159,7 @@ window.addEventListener("DOMContentLoaded", () => {
   updateStatus(false);
 });
 
-// BONUS: Gestione automatica cambi account/rete da parte del wallet
-// Ricarica la pagina per garantire che web3Instance si re-inizializzi correttamente
+// BONUS: Ricarica la pagina per garantire che tutto si re-inizializzi correttamente ai cambi di rete/account
 if (window.ethereum) {
     window.ethereum.on("accountsChanged", () => location.reload());
     window.ethereum.on("chainChanged", () => location.reload());

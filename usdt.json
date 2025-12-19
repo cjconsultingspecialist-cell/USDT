@@ -5,18 +5,19 @@
     "symbol": "USDT",
     "address": "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D",
     "decimals": 6,
-    "logoURI": "cryptologos.cc",
+    "type": "ERC20",
     "status": "active",
-    "type": "ERC20"
+    "logoURI": "https://cryptologos.cc/logos/tether-usdt-logo.png"
   },
   "market_data": {
-    "price_usd": 1.00
+    "price_usd": 1.0
   },
-  "network_config": {
-    "rpc_url": "https://rpc.sepolia.org",
-    "explorer_url": "https://sepolia.etherscan.io",
-    "standard": "EIP-20",
+  "network": {
+    "name": "Ethereum Sepolia",
+    "chainId": 11155111,
     "currency": "ETH",
-    "network_name": "Ethereum Sepolia"
+    "rpc": "https://rpc.sepolia.org",
+    "explorer": "https://sepolia.etherscan.io",
+    "standard": "EIP-20"
   }
 }

@@ -1,156 +1,80 @@
-// app.js – Security Wallet Pro v3 Universale e Professionale (Come Modulo ES6)
+import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.esm.min.js';
 
-// Importa le funzioni necessarie per la connessione universale
-import { openConnectModal, subscribeToConnect, subscribeToDisconnect } from 'cdn.jsdelivr.net';
+// Indirizzo contratto USDT su Sepolia (esempio reale)
+const USDT_ADDRESS = '0x3e7d1eab13ad0104d2750b8863b489d65364e32d';
 
-let account;
-let contract;
-let autoRefreshInterval;
-let web3Instance; 
+// ABI minima ERC20 per balanceOf e decimals
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function decimals() view returns (uint8)"
+];
 
-// === CONFIGURAZIONE ===
-const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D"; 
-const tokenSymbol = "USDT-EDU"; 
-const tokenDecimals = 6; 
-const tokenImageURL = "cryptologos.cc";
-const sepoliaChainId = '11155111'; 
+// Riferimenti DOM
+const balanceEl = document.getElementById('balance');
+const walletAddressEl = document.getElementById('walletAddress');
+const statusLightEl = document.getElementById('statusLight');
+const tokenPriceEl = document.getElementById('tokenPrice');
+const mainCardEl = document.getElementById('mainCard');
 
-// === 🔹 SNACKBAR (Notifiche) ===
-function showSnackbar(msg, color = "#323232") {
-  const s = document.getElementById("snackbar");
-  if (!s) return; 
-  s.innerText = msg;
-  s.style.backgroundColor = color;
-  s.className = "show";
-  setTimeout(() => s.className = s.className.replace("show", ""), 3000);
+let provider;
+let signer;
+let tokenContract;
+
+// Funzione per formattare indirizzo wallet (es. 0x1234...abcd)
+function formatAddress(address) {
+  return address.slice(0, 6) + '...' + address.slice(-4);
 }
 
-// === 🔹 GESTIONE CONNESSIONE MODULO UNIVERSALE ===
-
-subscribeToConnect(async ({ detail }) => {
-    const provider = detail.provider;
-    web3Instance = new Web3(provider);
-
-    const acc = await web3Instance.eth.getAccounts();
-    account = acc; 
-
-    const chainId = await web3Instance.eth.getChainId();
-    if (chainId.toString() !== sepoliaChainId) { 
-        showSnackbar("⚠️ Cambia rete in Sepolia!", "#f39c12");
-        updateStatus(false);
-        return;
-    }
-    
-    const abi = await (await fetch("usdt.json")).json();
-    contract = new web3Instance.eth.Contract(abi, contractAddress);
-    
-    showSnackbar("✅ Wallet connesso!", "#2ecc71");
-    updateStatus(true); 
-    await refreshBalance();
-    
-    if (!autoRefreshInterval) {
-        autoRefreshInterval = setInterval(refreshBalance, 15000);
-    }
-});
-
-subscribeToDisconnect(() => {
-    account = null;
-    updateStatus(false);
-    showSnackbar("Disconnesso da WalletConnect", "#e74c3c");
-    clearInterval(autoRefreshInterval);
-    autoRefreshInterval = null;
-});
-
-
-// === 🔹 REFRESH SALDO + PREZZO FITTIZIO ===
-async function refreshBalance() {
-  if (!contract || !account || !web3Instance) return;
+// Aggiorna UI saldo token
+async function updateBalance(address) {
   try {
-    const balance = await contract.methods.balanceOf(account).call();
-    const tokenBal = Number(balance) / 10**tokenDecimals;
-
-    document.getElementById("balance").innerText = `${tokenBal.toFixed(4)} ${tokenSymbol}`;
-    document.getElementById("tokenPrice").innerText = "$1.00 USD"; 
-
-  } catch (e) {
-    console.warn("aggiorna saldo:", e);
-    showSnackbar("Errore nel refresh del saldo", "#e74c3c");
+    const rawBalance = await tokenContract.balanceOf(address);
+    const decimals = await tokenContract.decimals();
+    const formatted = ethers.formatUnits(rawBalance, decimals);
+    balanceEl.textContent = `${formatted} USDT`;
+  } catch (error) {
+    console.error('Errore nel recupero saldo:', error);
+    balanceEl.textContent = 'Errore';
   }
 }
 
-// === 🔹 INVIA TOKEN ===
-async function sendTokens() {
-  if (!contract || !account) return showSnackbar("Connetti prima il wallet", "#f39c12");
-  const to = document.getElementById("recipient").value.trim();
-  const amount = document.getElementById("amount").value.trim();
-  if (!to || !amount) return showSnackbar("Inserisci dati validi", "#f39c12");
-  
+// Aggiorna prezzo (qui fisso 1$ per USDT, ma puoi integrare API CoinGecko)
+function updatePrice() {
+  tokenPriceEl.textContent = '$1.00 USD';
+}
+
+// Gestione connessione WalletConnect (usiamo la finestra modale già definita)
+window.openConnectModal = async () => {
   try {
-    const val = (parseFloat(amount) * 10**tokenDecimals).toString();
-    showSnackbar("⏳ Invio in corso...", "#3498db");
-    
-    const tx = await contract.methods.transfer(to, val).send({ from: account });
-    console.log(tx);
-    
-    showSnackbar(`✅ ${amount} ${tokenSymbol} inviati!`, "#2ecc71");
-    await refreshBalance();
-  } catch (e) {
-    console.error(e);
-    showSnackbar("Errore transazione: Controlla il gas", "#e74c3c");
+    await modal.open();
+
+    // Ottieni provider da WalletConnect
+    provider = new ethers.BrowserProvider(modal.getProvider());
+
+    // Prendi signer e indirizzo wallet
+    signer = await provider.getSigner();
+    const address = await signer.getAddress();
+
+    // Imposta contratto token
+    tokenContract = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, provider);
+
+    // Aggiorna UI
+    walletAddressEl.textContent = formatAddress(address);
+    statusLightEl.style.backgroundColor = '#22c55e'; // verde connesso
+    mainCardEl.classList.add('connected');
+
+    // Mostra saldo token
+    await updateBalance(address);
+
+    // Aggiorna prezzo
+    updatePrice();
+
+    // Chiudi modale (se vuoi)
+    await modal.close();
+  } catch (err) {
+    console.error('Connessione wallet fallita:', err);
+    walletAddressEl.textContent = 'Connessione fallita';
+    statusLightEl.style.backgroundColor = '#ef4444'; // rosso errore
+    mainCardEl.classList.remove('connected');
   }
-}
-
-// === 🔹 AGGIUNGI TOKEN (Funzione Didattica per il Logo) ===
-async function addToken() {
-  if (!window.ethereum || !account) return showSnackbar("Connetti prima il wallet", "#f39c12");
-
-  try {
-    const wasAdded = await window.ethereum.request({
-      method: "wallet_watchAsset",
-      params: {
-        type: "ERC20",
-        options: {
-          address: contractAddress,
-          symbol: tokenSymbol,
-          decimals: tokenDecimals,
-          image: tokenImageURL
-        }
-      }
-    });
-    showSnackbar(wasAdded ? `🪙 ${tokenSymbol} aggiunto!` : "❌ Aggiunta annullata",
-      wasAdded ? "#2ecc71" : "#e74c3c");
-  } catch (e) {
-    console.error(e);
-    showSnackbar("Errore aggiunta token", "#e74c3c");
-  }
-}
-
-// === 🔹 INDICATORE DI STATO (Nuova Grafica) ===
-function updateStatus(isConnected) {
-    const mainCard = document.getElementById("mainCard");
-    const statusText = document.getElementById("statusText");
-    const walletAddressDisplay = document.getElementById("walletAddress");
-
-    if (isConnected) {
-        mainCard.classList.add('connected');
-        statusText.innerText = 'Connesso';
-        walletAddressDisplay.innerText = account.substring(0, 8) + "..." + account.substring(account.length - 6);
-    } else {
-        mainCard.classList.remove('connected');
-        statusText.innerText = 'Disconnesso';
-        walletAddressDisplay.innerText = 'In attesa di autorizzazione...';
-        document.getElementById("balance").innerText = '0.00 USDT';
-    }
-}
-
-// === 🔹 ASSOCIAZIONI PULSANTI ===
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("sendButton").addEventListener("click", sendTokens);
-  document.getElementById("addTokenButton").addEventListener("click", addToken);
-  updateStatus(false);
-});
-
-if (window.ethereum) {
-    window.ethereum.on("accountsChanged", () => location.reload());
-    window.ethereum.on("chainChanged", () => location.reload());
-}
+};

@@ -1,164 +1,183 @@
-// app.js – Security Wallet Pro v2 con grafico, notifiche e refresh automatico
+// app.js – Security Wallet Pro v3 Universale e Professionale
 
 let account;
 let contract;
 let autoRefreshInterval;
 let chart;
+let web3Instance; // Useremo questa per Web3
 
 // === CONFIGURAZIONE ===
-const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
-const tokenSymbol = "USDT";
-const tokenDecimals = 6;
-const tokenImage = "USDT.jpg";
-const networkId = "0xaa36a7"; // Sepolia
+// Assicurati che l'indirizzo sia corretto per la tua deploy su Sepolia
+const contractAddress = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D"; 
+const tokenSymbol = "USDT-EDU"; // Simbolo didattico
+const tokenDecimals = 6; 
+const tokenImageURL = "cryptologos.cc";
+const networkId = "0xaa36a7"; // Sepolia Chain ID (hex)
 
-// === 🔹 SNACKBAR ===
-function showSnackbar(msg, color="#323232"){
-  const s=document.getElementById("snackbar");
-  s.innerText=msg; s.style.backgroundColor=color;
-  s.className="show"; setTimeout(()=>s.className=s.className.replace("show",""),3000);
+// === 🔹 SNACKBAR (Notifiche) ===
+function showSnackbar(msg, color = "#323232") {
+  const s = document.getElementById("snackbar");
+  // Assicurati di avere un div con id="snackbar" nell'html
+  if (!s) return; 
+  s.innerText = msg;
+  s.style.backgroundColor = color;
+  s.className = "show";
+  setTimeout(() => s.className = s.className.replace("show", ""), 3000);
 }
 
-// === 🔹 CONNESSIONE ===
-async function connectWallet(){
-  try{
-    if(!window.ethereum) return showSnackbar("MetaMask non rilevato!","#e74c3c");
-    const acc=await window.ethereum.request({method:"eth_requestAccounts"});
-    account=acc[0];
-    document.getElementById("walletAddress").innerText="Wallet: "+account;
-    updateStatus(true);
+// === 🔹 CONNESSIONE UNIVERSALE (EIP-6963 + WalletConnect) ===
+// Il pulsante di connessione è gestito da index.html tramite openConnectModal()
 
-    const chainId=await window.ethereum.request({method:"eth_chainId"});
-    if(chainId.toLowerCase()!==networkId){
-      showSnackbar("Cambia rete in Sepolia!","#f39c12");updateStatus(false);return;
+// Ascolta l'evento che AppKit/WalletConnect emette quando un utente si connette
+window.addEventListener('modal:connect', async ({ detail }) => {
+    // detail contiene l'informazione sul provider scelto
+    const provider = detail.provider;
+    web3Instance = new Web3(provider);
+
+    // Ottieni l'account
+    const acc = await web3Instance.eth.getAccounts();
+    account = acc[0];
+
+    // Verifica la rete (Sepolia)
+    const chainId = await web3Instance.eth.getChainId(); // getChainId() ora ritorna un number
+    if (chainId.toString() !== '11155111') { // 11155111 è Sepolia in decimale
+        showSnackbar("⚠️ Cambia rete in Sepolia!", "#f39c12");
+        updateStatus(false);
+        return;
     }
+    
+    // Carica il contratto ABI
+    const abi = await (await fetch("usdt.json")).json();
+    contract = new web3Instance.eth.Contract(abi, contractAddress);
+    
+    showSnackbar("✅ Wallet connesso!", "#2ecc71");
+    updateStatus(true); // Aggiorna lo stato grafico a "Connesso"
+    await refreshBalance();
+    
+    // Avvia refresh automatico
+    if (!autoRefreshInterval) {
+        autoRefreshInterval = setInterval(refreshBalance, 15000);
+    }
+});
 
-    const web3=new Web3(window.ethereum);
-    const abi=await (await fetch("usdt.json")).json();
-    contract=new web3.eth.Contract(abi,contractAddress);
-    showSnackbar("✅ Wallet connesso!","#2ecc71");
-    await refreshBalance();
-    if(!autoRefreshInterval){autoRefreshInterval=setInterval(refreshBalance,15000);}
-  }catch(e){
-    console.error(e);showSnackbar("Errore connessione","#e74c3c");
+// Ascolta l'evento di disconnessione
+window.addEventListener('modal:disconnect', () => {
+    account = null;
     updateStatus(false);
+    showSnackbar("Disconnesso da WalletConnect", "#e74c3c");
+    if (chart) { chart.destroy(); chart = null; }
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+});
+
+
+// === 🔹 REFRESH SALDO + GRAFICO ===
+async function refreshBalance() {
+  if (!contract || !account || !web3Instance) return;
+  try {
+    const balance = await contract.methods.balanceOf(account).call();
+    // Non abbiamo bisogno di chiamare decimals() ogni volta se è fisso a 6
+    const tokenBal = Number(balance) / 10**tokenDecimals;
+
+    // bilancio ETH
+    const ethBal = Number(await web3Instance.eth.getBalance(account)) / 1e18;
+
+    // Aggiorna l'interfaccia con la nuova grafica
+    document.getElementById("balance").innerText = `${tokenBal.toFixed(4)} ${tokenSymbol}`;
+    updateChart(tokenBal, ethBal);
+  } catch (e) {
+    console.warn("aggiorna saldo:", e);
+    showSnackbar("Errore nel refresh del saldo", "#e74c3c");
   }
 }
 
-// === 🔹 REFRESH SALDO + GRAFICO ===
-async function refreshBalance(){
-  if(!contract||!account)return;
-  try{
-    const balance=await contract.methods.balanceOf(account).call();
-    const dec=await contract.methods.decimals().call();
-    const tokenBal=balance/10**dec;
-
-    // bilancio ETH
-    const web3=new Web3(window.ethereum);
-    const ethBal=Number(await web3.eth.getBalance(account))/1e18;
-
-    document.getElementById("balance").innerText=`${tokenBal.toFixed(4)} ${tokenSymbol}`;
-    updateChart(tokenBal,ethBal);
-  }catch(e){console.warn("aggiorna saldo:",e);}
-}
-
 // === 🔹 GRAFICO ===
-function updateChart(tokenBal,ethBal){
-  const ctx=document.getElementById("chartBalance");
-  const data=[tokenBal,ethBal];
-  const labels=[`${tokenSymbol} Token`,`ETH Gas`];
-  const colors=["#27ae60","#1a73e8"];
-  if(chart){chart.data.datasets[0].data=data;chart.update();return;}
-  chart=new Chart(ctx,{type:"doughnut",
-    data:{labels:labels,
-      datasets:[{data:data,backgroundColor:colors,borderWidth:2,hoverOffset:10}]
-    },
-    options:{plugins:{legend:{position:"bottom",labels:{color:"#333",font:{size:14}}}},
-      cutout:"65%"
-    }
-  });
+function updateChart(tokenBal, ethBal) {
+  // Rimosso il canvas dall'HTML per semplificare la grafica, 
+  // quindi questa funzione non è più necessaria, a meno che tu non lo rimetta.
 }
 
-// === 🔹 MOSTRA SALDO MANUALE ===
-async function getBalance(){
-  if(!contract||!account)return showSnackbar("Connetti prima MetaMask","#f39c12");
-  await refreshBalance();showSnackbar("💰 Saldo aggiornato!","#3498db");
-}
-
-// === 🔹 INVIA TOKEN ===
-async function sendTokens(){
-  if(!contract||!account)return showSnackbar("Connetti prima MetaMask","#f39c12");
-  const to=document.getElementById("recipient").value.trim();
-  const amount=document.getElementById("amount").value.trim();
-  if(!to||!amount)return showSnackbar("Inserisci dati validi","#f39c12");
-  try{
-    const dec=await contract.methods.decimals().call();
-    const val=(amount*10**dec).toString();
-    showSnackbar("⏳ Invio in corso...","#3498db");
-    const tx=await contract.methods.transfer(to,val).send({from:account});
+// === 🔹 INVIA TOKEN ===
+async function sendTokens() {
+  if (!contract || !account) return showSnackbar("Connetti prima il wallet", "#f39c12");
+  const to = document.getElementById("recipient").value.trim();
+  const amount = document.getElementById("amount").value.trim();
+  if (!to || !amount) return showSnackbar("Inserisci dati validi", "#f39c12");
+  
+  try {
+    const val = (parseFloat(amount) * 10**tokenDecimals).toString(); // Converti in stringa per web3
+    showSnackbar("⏳ Invio in corso...", "#3498db");
+    
+    // Invia la transazione utilizzando il provider universale connesso
+    const tx = await contract.methods.transfer(to, val).send({ from: account });
     console.log(tx);
-    showSnackbar(`✅ ${amount} ${tokenSymbol} inviati!`,"#2ecc71");
-    await refreshBalance();
-  }catch(e){console.error(e);showSnackbar("Errore transazione","#e74c3c");}
+    
+    showSnackbar(`✅ ${amount} ${tokenSymbol} inviati!`, "#2ecc71");
+    await refreshBalance();
+  } catch (e) {
+    console.error(e);
+    showSnackbar("Errore transazione: Controlla il gas", "#e74c3c");
+  }
 }
 
-// === 🔹 MOSTRA INDIRIZZO ===
-function showAddress(){
-  if(!account)return showSnackbar("Connetti prima MetaMask","#f39c12");
-  navigator.clipboard.writeText(account);
-  showSnackbar("📋 Indirizzo copiato!","#3498db");
-}
+// === 🔹 AGGIUNGI TOKEN (Funzione Didattica per il Logo) ===
+async function addToken() {
+  if (!window.ethereum || !account) return showSnackbar("Connetti prima il wallet", "#f39c12");
 
-// === 🔹 AGGIUNGI TOKEN ===
-async function addToken(){
-  try{
-    const wasAdded=await window.ethereum.request({
-      method:"wallet_watchAsset",
-      params:{type:"ERC20",options:{
-        address:contractAddress,symbol:tokenSymbol,decimals:tokenDecimals,image:tokenImage}}
+  try {
+    const wasAdded = await window.ethereum.request({
+      method: "wallet_watchAsset",
+      params: {
+        type: "ERC20",
+        options: {
+          address: contractAddress,
+          symbol: tokenSymbol,
+          decimals: tokenDecimals,
+          image: tokenImageURL
+        }
+      }
     });
-    showSnackbar(wasAdded?`🪙 ${tokenSymbol} aggiunto!`:"❌ Aggiunta annullata",
-      wasAdded?"#2ecc71":"#e74c3c");
-  }catch(e){console.error(e);showSnackbar("Errore aggiunta token","#e74c3c");}
+    showSnackbar(wasAdded ? `🪙 ${tokenSymbol} aggiunto!` : "❌ Aggiunta annullata",
+      wasAdded ? "#2ecc71" : "#e74c3c");
+  } catch (e) {
+    console.error(e);
+    showSnackbar("Errore aggiunta token", "#e74c3c");
+  }
 }
 
-// === 🔹 INDICATORE ===
-function updateStatus(c){
-  const s=document.getElementById("statusLight");
-  if(!s)return;
-  if(c){s.style.background="#2ecc71";s.innerText="● Connesso";}
-  else{s.style.background="#e74c3c";s.innerText="● Disconnesso";}
-}
+// === 🔹 INDICATORE DI STATO (Nuova Grafica) ===
+function updateStatus(isConnected) {
+    const mainCard = document.getElementById("mainCard");
+    const statusText = document.getElementById("statusText");
+    const walletAddressDisplay = document.getElementById("walletAddress");
 
-// === 🔹 EVENTI METAMASK ===
-if(window.ethereum){
-  window.ethereum.on("accountsChanged",async acc=>{
-    if(acc.length===0){account=null;updateStatus(false);
-      document.getElementById("walletAddress").innerText="Wallet Disconnesso";
-      showSnackbar("Disconnesso da MetaMask","#e74c3c");
-      if(chart){chart.destroy();chart=null;}
-      clearInterval(autoRefreshInterval);autoRefreshInterval=null;
-    }else{
-      account=acc[0];updateStatus(true);
-      document.getElementById("walletAddress").innerText="Wallet: "+account;
-      showSnackbar("✅ Account cambiato","#3498db");await refreshBalance();
+    if (isConnected) {
+        mainCard.classList.add('connected');
+        statusText.innerText = 'Connesso';
+        // Mostra l'indirizzo completo temporaneamente prima di accorciarlo
+        walletAddressDisplay.innerText = account; 
+        walletAddressDisplay.innerText = account.substring(0, 8) + "..." + account.substring(account.length - 6);
+    } else {
+        mainCard.classList.remove('connected');
+        statusText.innerText = 'Disconnesso';
+        walletAddressDisplay.innerText = 'In attesa di autorizzazione...';
+        document.getElementById("balance").innerText = '0.00 USDT';
     }
-  });
-  window.ethereum.on("chainChanged",id=>{
-    if(id.toLowerCase()!==networkId){
-      showSnackbar("⚠️ Rete non supportata","#f39c12");
-      updateStatus(false);if(chart){chart.destroy();chart=null;}
-      clearInterval(autoRefreshInterval);autoRefreshInterval=null;
-    }else connectWallet();
-  });
 }
 
-// === 🔹 ASSOCIAZIONI ===
-window.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("connectButton").addEventListener("click",connectWallet);
-  document.getElementById("balanceButton").addEventListener("click",getBalance);
-  document.getElementById("sendButton").addEventListener("click",sendTokens);
-  document.getElementById("addressButton").addEventListener("click",showAddress);
-  document.getElementById("addTokenButton").addEventListener("click",addToken);
+// === 🔹 ASSOCIAZIONI PULSANTI ===
+window.addEventListener("DOMContentLoaded", () => {
+  // Il pulsante di connessione è gestito direttamente nell'HTML ora con onclick="openConnectModal()"
+  
+  // Associa gli altri pulsanti
+  document.getElementById("sendButton").addEventListener("click", sendTokens);
+  document.getElementById("addTokenButton").addEventListener("click", addToken);
+
   updateStatus(false);
 });
+
+// BONUS: Gestione automatica cambi account/rete da parte del wallet
+if (window.ethereum) {
+    window.ethereum.on("accountsChanged", () => location.reload());
+    window.ethereum.on("chainChanged", () => location.reload());
+}

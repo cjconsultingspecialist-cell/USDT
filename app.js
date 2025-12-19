@@ -1,109 +1,54 @@
-import { createAppKit } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.2.0/dist/appkit.esm.js';
+const USDT_ADDRESS = "0xYOUR_SEPOLIA_CONTRACT";
+const USDT_DECIMALS = 6;
 
-const PROJECT_ID = '42e5e216a501f010edd0dcbf77e8bbd5';
+const provider = new ethers.BrowserProvider(window.ethereum);
+let signer, contract, user;
 
-let config;
-let modal;
-let signer;
-let provider;
+const ABI = await fetch("./usdt.json").then(r => r.json());
 
-const ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function transfer(address,uint256) returns (bool)",
-  "function symbol() view returns (string)",
-  "function decimals() view returns (uint8)"
-];
+const connectBtn = document.getElementById("connectBtn");
+const sendBtn = document.getElementById("sendBtn");
+const disconnectBtn = document.getElementById("disconnectBtn");
 
-const path = p => `/USDT/${p.replace(/^\/?/,'')}`;
+connectBtn.onclick = connect;
+sendBtn.onclick = send;
+disconnectBtn.onclick = disconnect;
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(path('service-worker.js'));
-  });
-}
-
-async function loadConfig() {
-  const res = await fetch(path('usdt.json'));
-  config = await res.json();
-  initUI();
-  initWallets();
-}
-
-function initUI() {
-  document.title = `${config.asset.symbol} | Asset Wallet`;
-  document.getElementById('tokenName').innerText = config.asset.name;
-  document.getElementById('tokenLogo').src = config.asset.logoURI;
-  document.getElementById('favicon').href = config.asset.logoURI;
-  document.getElementById('explorer').href =
-    `${config.network_config.explorer_url}/address/${config.asset.address}`;
-}
-
-function initWallets() {
-  modal = createAppKit({
-    projectId: PROJECT_ID,
-    networks: [{
-      id: `eip155:${config.chainId}`,
-      name: 'Ethereum',
-      rpcUrl: config.network_config.rpc_url,
-      currency: 'ETH'
-    }],
-    features: { analytics: false, socials: false, email: false }
-  });
-
-  document.getElementById('connectBtn').onclick = async () => {
-    if (window.ethereum) {
-      provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-    } else {
-      await modal.open();
-      provider = new ethers.BrowserProvider(modal.getWalletProvider());
-    }
-    await onConnected();
-  };
-
-  document.getElementById('sendBtn').onclick = sendTokens;
-}
-
-async function onConnected() {
+async function connect() {
+  await provider.send("eth_requestAccounts", []);
   signer = await provider.getSigner();
-  const address = await signer.getAddress();
+  user = await signer.getAddress();
 
-  document.getElementById('walletLabel').innerText =
-    `${address.slice(0,6)}...${address.slice(-4)}`;
-  document.getElementById('statusDot').classList.add('online');
-  document.getElementById('connectBtn').innerText = 'Wallet Connected';
+  contract = new ethers.Contract(USDT_ADDRESS, ABI, signer);
 
-  document.getElementById('sendArea').style.display = 'block';
-  document.getElementById('sendBtn').style.display = 'block';
+  document.getElementById("connectBtn").classList.add("hidden");
+  document.getElementById("transferBox").classList.remove("hidden");
 
-  await updateBalance();
+  refreshBalance();
 }
 
-async function updateBalance() {
-  const contract = new ethers.Contract(config.asset.address, ABI, provider);
-  const addr = await signer.getAddress();
+async function refreshBalance() {
+  const raw = await contract.balanceOf(user);
+  const balance = Number(ethers.formatUnits(raw, USDT_DECIMALS)).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 
-  const raw = await contract.balanceOf(addr);
-  const value = ethers.formatUnits(raw, config.asset.decimals);
-
-  document.getElementById('balance').innerText =
-    Number(value).toLocaleString('en-US', { minimumFractionDigits: 2 });
-
-  document.getElementById('usdValue').innerText =
-    `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD`;
+  document.getElementById("balance").innerText = balance;
+  document.getElementById("usdValue").innerText = `$${balance} USD`;
 }
 
-async function sendTokens() {
-  const to = document.getElementById('recipient').value;
-  const amount = document.getElementById('amount').value;
+async function send() {
+  const to = document.getElementById("to").value;
+  const amount = document.getElementById("amount").value;
 
-  const contract = new ethers.Contract(config.asset.address, ABI, signer);
-  const parsed = ethers.parseUnits(amount, config.asset.decimals);
-
+  const parsed = ethers.parseUnits(amount, USDT_DECIMALS);
   const tx = await contract.transfer(to, parsed);
   await tx.wait();
 
-  await updateBalance();
+  refreshBalance();
 }
 
-loadConfig();
+function disconnect() {
+  location.reload();
+}

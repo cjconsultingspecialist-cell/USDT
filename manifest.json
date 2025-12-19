@@ -1,22 +1,21 @@
 {
-  "short_name": "Tether USD",
   "name": "Tether USD Institutional Wallet",
+  "short_name": "USDT",
+  "start_url": "/USDT/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#26a17b",
+  "scope": "/USDT/",
   "icons": [
     {
-      "src": "/USDT/icon-192.png",
+      "src": "/USDT/wallet_icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/USDT/icon-512.png",
+      "src": "/USDT/wallet_icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "start_url": "/USDT/index.html",
-  "scope": "/USDT/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#26a17b",
-  "description": "Enterprise asset management interface for stablecoin operations."
+  ]
 }

@@ -1,56 +1,67 @@
 import { createAppKit } from 'cdn.jsdelivr.net'
 
-// --- CONFIGURAZIONE REOWN ---
 const PROJECT_ID = '42e5e216a501f010edd0dcbf77e8bbd5';
-
-// --- VARIABILI DI STATO ---
 let config = null;
 let modal = null;
+
+// Funzione di utilità per gestire i percorsi in ambiente GitHub Pages
+function getAbsolutePath(relativePath) {
+    // Aggiunge /USDT/ davanti al percorso
+    return `/USDT/${relativePath.replace(/^\.?\//, '')}`;
+}
+
+/**
+ * Registrazione del Service Worker (PWA)
+ */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Usa il percorso assoluto per registrare il service worker
+        navigator.serviceWorker.register(getAbsolutePath('service-worker.js'))
+            .then(reg => console.log('Service Worker Registered with scope:', reg.scope))
+            .catch(err => console.error('SW registration failed:', err));
+    });
+}
+
 
 /**
  * Caricamento dati dal file usdt.json
  */
 async function loadConfiguration() {
     try {
-        const response = await fetch('./usdt.json');
+        // Usa il percorso assoluto per fetchare il JSON
+        const response = await fetch(getAbsolutePath('usdt.json'));
+        if (!response.ok) throw new Error("JSON configuration not found.");
         config = await response.json();
         initializeUI();
         initializeWalletConnect();
     } catch (error) {
         console.error("Critical: Configuration load failed", error);
+        document.getElementById('tokenName').innerText = "Error Loading Config";
     }
 }
 
-/**
- * Inizializza l'interfaccia con i dati del JSON
- */
 function initializeUI() {
     document.getElementById('tokenName').innerText = config.asset.name;
     document.getElementById('tokenLogo').src = config.asset.logoURI;
     document.getElementById('favicon').href = config.asset.logoURI;
     document.getElementById('balance').innerText = `0.00 ${config.asset.symbol}`;
     document.getElementById('explorerLink').href = `${config.network_config.explorer_url}/address/${config.asset.address}`;
+    document.title = `${config.asset.symbol} | Institutional Wallet`;
 }
 
-/**
- * Configura il sistema di connessione Reown
- */
 function initializeWalletConnect() {
     modal = createAppKit({
         networks: [{
             id: `eip155:${config.chainId}`,
-            name: 'Ethereum Network',
+            name: config.network_config.network_name || 'Ethereum Network',
             rpcUrl: config.network_config.rpc_url,
-            currency: 'ETH'
+            currency: config.network_config.currency || 'ETH'
         }],
         projectId: PROJECT_ID,
         features: { analytics: false, email: false, socials: false }
     });
 
-    // Listener per il bottone di connessione
     document.getElementById('connectBtn').addEventListener('click', () => modal.open());
-
-    // Monitoraggio cambio stato wallet
     modal.subscribeState(async (state) => {
         if (state.selectedNetworkId) {
             updateAccountData();
@@ -58,26 +69,22 @@ function initializeWalletConnect() {
     });
 }
 
-/**
- * Recupero dati blockchain in tempo reale
- */
 async function updateAccountData() {
+    if (!config) return;
+
     try {
         const provider = new ethers.BrowserProvider(window.ethereum || modal.getWalletProvider());
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
 
-        // Aggiorna UI con indirizzo accorciato
         document.getElementById('walletAddress').innerText = `${address.substring(0,6)}...${address.substring(38)}`;
         document.getElementById('statusDot').classList.add('status-online');
         document.getElementById('connectBtn').innerText = "Wallet Integrated";
 
-        // Interazione con lo Smart Contract
         const abi = ["function balanceOf(address) view returns (uint256)"];
         const contract = new ethers.Contract(config.asset.address, abi, provider);
         const balance = await contract.balanceOf(address);
         
-        // Formattazione basata sui decimali nel JSON
         const formatted = ethers.formatUnits(balance, config.asset.decimals);
         document.getElementById('balance').innerText = `${parseFloat(formatted).toLocaleString('en-US', {minimumFractionDigits: 2})} ${config.asset.symbol}`;
 

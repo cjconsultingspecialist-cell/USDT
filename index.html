@@ -1,221 +1,176 @@
 <!DOCTYPE html>
-
 <html lang="it">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Security Wallet</title>
-
+    <title>Tether USD | Institutional Wallet Connect</title>
     
-
-    <!-- Icone per iOS e Android (usano il nuovo logo della DApp) -->
-
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/wallet_icon.jpg">
-
-    <link rel="icon" href="https://raw.githubusercontent.com/cjconsultingspecialist-cell/USDT/refs/heads/main/wallet_icon.jpg">
-
-    <meta name="theme-color" content="#27ae60">
-
-
-    <!-- Libreria Ethers.js per la connessione Blockchain -->
-
+    <!-- Asset grafici istituzionali -->
+    <link rel="icon" href="cryptologos.cc">
+    <link href="fonts.googleapis.com" rel="stylesheet">
+    
+    <!-- Ethers.js v6 per interazione blockchain -->
     <script src="cdnjs.cloudflare.com"></script>
 
-    
-
     <style>
+        :root {
+            --tether-green: #009393;
+            --bg-gradient: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+        }
 
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-align: center; padding: 40px 20px; background: #f0f2f5; color: #1c1e21; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
 
-        .card { background: white; padding: 40px; border-radius: 24px; display: inline-block; box-shadow: 0 12px 40px rgba(0,0,0,0.12); border: 1px solid #e1e4e8; max-width: 380px; width: 100%; }
+        .card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
 
-        .app-title { font-size: 28px; font-weight: 800; color: #1a73e8; margin-bottom: 5px; }
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
 
-        .app-subtitle { font-size: 14px; color: #5f6368; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
+        .brand img { width: 35px; height: 35px; }
+        .brand span { font-size: 22px; font-weight: 800; color: var(--tether-green); letter-spacing: -0.5px; }
 
-        img#tokenLogo { width: 110px; height: 110px; border-radius: 50%; margin-bottom: 15px; border: 4px solid #27ae60; padding: 4px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .balance-display {
+            background: #f1f5f9;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
 
-        .price-tag { font-size: 18px; color: #27ae60; font-weight: 700; margin-bottom: 25px; }
+        .balance-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        #balance { font-size: 38px; font-weight: 800; color: #0f172a; margin: 0; }
 
-        .balance-container { background: #f8f9fa; padding: 20px; border-radius: 16px; margin-bottom: 30px; border: 1px solid #dee2e6; }
+        .btn-connect {
+            width: 100%;
+            background: var(--tether-green);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 147, 147, 0.2);
+        }
 
-        .balance-label { font-size: 13px; color: #70757a; margin-bottom: 8px; }
+        .btn-connect:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 147, 147, 0.3); }
 
-        #balance { font-size: 32px; font-weight: 700; margin: 0; color: #202124; }
+        .info-footer {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
 
-        button { width: 100%; padding: 16px; font-size: 18px; cursor: pointer; background: #1a73e8; color: white; border: none; border-radius: 12px; transition: all 0.2s ease; font-weight: 600; }
+        .status-dot { height: 8px; width: 8px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-online { background-color: #22c55e; }
 
-        button:hover { background: #1557b0; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,115,232,0.3); }
-
-        button:active { transform: translateY(0); }
-
-        .status-box { margin-top: 20px; padding: 10px; border-radius: 8px; font-size: 13px; color: #5f6368; background: #fff; }
-
-        #walletAddress { font-family: monospace; color: #1a73e8; font-weight: 600; }
-
+        #walletAddress { font-family: 'Courier New', monospace; font-weight: bold; color: var(--tether-green); }
+        a { color: var(--tether-green); text-decoration: none; font-weight: 600; }
     </style>
-
 </head>
-
 <body>
 
-
     <div class="card">
-
-        <div class="app-title">Security Wallet</div>
-
-        <div class="app-subtitle">Asset Management</div>
-
-        
-
-        <!-- Dati dinamici dal JSON -->
-
-        <img id="tokenLogo" src="cjconsultingspecialist-cell.github.io" alt="Logo">
-
-        <h2 id="tokenName" style="margin: 10px 0;">Tether USD</h2>
-
-        <div class="price-tag">Value: <span id="tokenPrice">1.00 USD</span></div>
-
-        
-
-        <div class="balance-container">
-
-            <div class="balance-label">DISPONIBILITÀ ATTUALE</div>
-
-            <h2 id="balance">0.00 USDT</h2>
-
+        <div class="brand">
+            <img src="cryptologos.cc" alt="USDT">
+            <span>Tether USD</span>
         </div>
 
-
-        <button onclick="connectWallet()">Accedi con MetaMask</button>
-
-        
-
-        <div class="status-box">
-
-            Stato: <span id="walletAddress">Wallet Disconnesso</span>
-
+        <div class="balance-display">
+            <div class="balance-label">Disponibilità Attuale</div>
+            <div id="balance">0.00 USDT</div>
         </div>
 
+        <button class="btn-connect" id="connectBtn">Connetti Wallet</button>
+
+        <div class="info-footer">
+            <div><span id="statusDot" class="status-dot"></span> Stato: <span id="walletAddress">Disconnesso</span></div>
+            <div style="margin-top: 10px;">
+                Network: <a href="sepolia.etherscan.io" target="_blank">Ethereum Sepolia</a>
+            </div>
+        </div>
     </div>
 
+    <script type="module">
+        import { createAppKit } from 'cdn.jsdelivr.net'
 
-    <script>
+        // I tuoi dati inseriti correttamente
+        const projectId = '42e5e216a501f010edd0dcbf77e8bbd5'; 
+        const CONTRACT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D"; 
 
-        // Configurazione URL Database JSON
+        const modal = createAppKit({
+            networks: [{
+                id: 'eip155:11155111',
+                name: 'Sepolia',
+                rpcUrl: 'https://rpc.sepolia.org',
+                currency: 'ETH'
+            }],
+            projectId,
+            features: { analytics: false, email: false, socials: false }
+        });
 
-        const jsonUrl = "raw.githubusercontent.com";
+        const connectBtn = document.getElementById('connectBtn');
+        const walletAddrSpan = document.getElementById('walletAddress');
+        const statusDot = document.getElementById('statusDot');
+        const balanceDiv = document.getElementById('balance');
 
-        let contractAddress;
+        connectBtn.addEventListener('click', () => modal.open());
 
+        // Listener per cambio stato connessione
+        modal.subscribeState(async (state) => {
+            if (state.selectedNetworkId) {
+                await updateUI();
+            }
+        });
 
-        // Funzione per caricare i dati estetici e tecnici dal database JSON
-
-        async function loadAppData() {
-
+        async function updateUI() {
             try {
+                // Utilizzo del provider Ethers v6
+                const provider = new ethers.BrowserProvider(window.ethereum || modal.getWalletProvider());
+                const signer = await provider.getSigner();
+                const address = await signer.getAddress();
 
-                const response = await fetch(jsonUrl);
+                walletAddrSpan.innerText = address.substring(0,6) + "..." + address.substring(38);
+                statusDot.classList.add('status-online');
+                connectBtn.innerText = "Wallet Collegato";
 
-                if (!response.ok) throw new Error("Errore nel caricamento del database");
-
-                const data = await response.json();
-
+                // Chiamata allo Smart Contract
+                const abi = ["function balanceOf(address) view returns (uint256)"];
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+                const balance = await contract.balanceOf(address);
                 
-
-                document.getElementById('tokenName').innerText = data.name;
-
-                // document.getElementById('tokenLogo').src = data.logoURI; // Non usiamo più il logo del token qui
-
-                
-
-                if(data.extensions && data.extensions.price_usd) {
-
-                    document.getElementById('tokenPrice').innerText = data.extensions.price_usd + " USD";
-
-                }
-
-                
-
-                contractAddress = data.address;
-
-                console.log("DApp Pronta. Contratto collegato:", contractAddress);
-
-            } catch (error) {
-
-                console.error("Errore Inizializzazione:", error);
-
-                document.getElementById('walletAddress').innerText = "Errore Database JSON";
-
+                // Formattazione a 6 decimali (standard USDT)
+                const formatted = Number(balance) / 1000000;
+                balanceDiv.innerText = formatted.toLocaleString('en-US', {minimumFractionDigits: 2}) + " USDT";
+            } catch (err) {
+                console.error("Errore nel caricamento dati:", err);
             }
-
         }
-
-
-        // Funzione per connettersi alla Blockchain Sepolia tramite MetaMask
-
-        async function connectWallet() {
-
-            if (window.ethereum) {
-
-                try {
-
-                    const provider = new ethers.BrowserProvider(window.ethereum);
-
-                    const accounts = await provider.send("eth_requestAccounts", []);
-
-                    const signer = await provider.getSigner();
-
-                    const userAddress = await signer.getAddress();
-
-                    
-
-                    document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
-
-
-                    const abi = ["function balanceOf(address) view returns (uint256)"];
-
-                    const contract = new ethers.Contract(contractAddress, abi, provider);
-
-                    
-
-                    const balance = await contract.balanceOf(userAddress);
-
-                    
-
-                    const formattedBalance = Number(balance) / 1000000;
-
-                    document.getElementById('balance').innerText = formattedBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) + " USDT";
-
-                    
-
-                    console.log("Connessione riuscita per l'utente:", userAddress);
-
-                } catch (err) {
-
-                    console.error(err);
-
-                    alert("Connessione fallita. Assicurati di essere sulla rete Sepolia.");
-
-                }
-
-            } else {
-
-                alert("MetaMask non rilevato. Per favore installa l'estensione o usa il browser di MetaMask su Mobile.");
-
-            }
-
-        }
-
-
-        loadAppData();
-
     </script>
-
 </body>
-
 </html>

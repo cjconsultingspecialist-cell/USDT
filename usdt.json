@@ -10,13 +10,13 @@
     "type": "ERC20"
   },
   "market_data": {
-    "price_usd": 1.00,
-    "change_24h": 0.01,
-    "liquidity_provider": "Multi-Chain Bridge"
+    "price_usd": 1.00
   },
   "network_config": {
     "rpc_url": "https://rpc.sepolia.org",
     "explorer_url": "https://sepolia.etherscan.io",
-    "standard": "EIP-20"
+    "standard": "EIP-20",
+    "currency": "ETH",
+    "network_name": "Ethereum Sepolia"
   }
 }

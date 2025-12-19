@@ -31,6 +31,7 @@ async function connect() {
   }
 
   await importToken();
+
   contract = new ethers.Contract(TOKEN_ADDRESS, ABI, signer);
   updateBalance();
 }
@@ -66,23 +67,46 @@ async function updateBalance() {
 }
 
 async function send() {
-  const to = document.getElementById("to").value;
-  const amount = document.getElementById("amount").value;
+  const sendButton = document.querySelector(".btn-primary");
 
-  if (!ethers.isAddress(to)) {
-    alert("Invalid recipient");
-    return;
+  try {
+    // 🔒 HARDENING: disabilita il bottone durante la transazione
+    sendButton.disabled = true;
+
+    const to = document.getElementById("to").value;
+    const amount = document.getElementById("amount").value;
+
+    if (!ethers.isAddress(to)) {
+      alert("Invalid recipient address");
+      return;
+    }
+
+    if (!amount || Number(amount) <= 0) {
+      alert("Invalid amount");
+      return;
+    }
+
+    const value = ethers.parseUnits(amount, TOKEN_DECIMALS);
+    const tx = await contract.transfer(to, value);
+
+    // Attende conferma blockchain (UX reale)
+    await tx.wait();
+
+    updateBalance();
+
+  } catch (error) {
+    console.error(error);
+    alert("Transaction failed");
+
+  } finally {
+    // 🔓 riabilita il bottone SEMPRE
+    sendButton.disabled = false;
   }
-
-  const value = ethers.parseUnits(amount, TOKEN_DECIMALS);
-  const tx = await contract.transfer(to, value);
-  await tx.wait();
-
-  updateBalance();
 }
 
 function disconnect() {
   location.reload();
 }
 
+// Auto-connect on load
 connect();

@@ -4,13 +4,11 @@ const STATIC_ASSETS = [
   "/USDT/",
   "/USDT/index.html",
   "/USDT/app.js",
-  "/USDT/usdt.json",
   "/USDT/manifest.json",
   "/USDT/icon-192.png",
   "/USDT/icon-512.png"
 ];
 
-// INSTALL
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
@@ -18,7 +16,6 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// ACTIVATE
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -32,33 +29,19 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// FETCH
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
+  if (event.request.method !== "GET") return;
 
-  // ❌ Skip non-GET requests
-  if (request.method !== "GET") return;
-
-  // ❌ Skip blockchain & external APIs
   if (
-    request.url.includes("rpc") ||
-    request.url.includes("alchemy") ||
-    request.url.includes("infura") ||
-    request.url.includes("coingecko") ||
-    request.url.includes("etherscan")
+    event.request.url.includes("alchemy") ||
+    event.request.url.includes("infura") ||
+    event.request.url.includes("rpc") ||
+    event.request.url.includes("etherscan")
   ) {
     return;
   }
 
-  // ✅ Cache-first only for static assets
   event.respondWith(
-    caches.match(request).then((cached) => {
-      return (
-        cached ||
-        fetch(request).then((response) => {
-          return response;
-        })
-      );
-    })
+    caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });

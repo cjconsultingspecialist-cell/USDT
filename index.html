@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Il titolo verrà aggiornato da app.js -->
     <title>Asset Management | Institutional Interface</title>
     
+    <!-- Link al Manifest PWA -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Icona dinamica (verrà aggiornata da app.js) -->
     <link rel="icon" id="favicon" href="">
+    
+    <!-- Font e Librerie -->
     <link href="fonts.googleapis.com" rel="stylesheet">
     <script src="cdnjs.cloudflare.com"></script>
 
@@ -93,7 +100,7 @@
 
     <div class="card">
         <div class="brand">
-            <img id="tokenLogo" src="" alt="">
+            <img id="tokenLogo" src="" alt="Token Logo">
             <span id="tokenName">Loading...</span>
         </div>
 
@@ -112,7 +119,7 @@
         </div>
     </div>
 
-    <!-- Script principale caricato come modulo -->
+    <!-- Il codice logico risiede interamente in app.js -->
     <script type="module" src="./app.js"></script>
 </body>
 </html>

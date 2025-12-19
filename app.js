@@ -17,7 +17,6 @@ const networkId = "0xaa36a7"; // Sepolia Chain ID (hex)
 // === 🔹 SNACKBAR (Notifiche) ===
 function showSnackbar(msg, color = "#323232") {
   const s = document.getElementById("snackbar");
-  // Assicurati di avere un div con id="snackbar" nell'html
   if (!s) return; 
   s.innerText = msg;
   s.style.backgroundColor = color;
@@ -30,31 +29,28 @@ function showSnackbar(msg, color = "#323232") {
 
 // Ascolta l'evento che AppKit/WalletConnect emette quando un utente si connette
 window.addEventListener('modal:connect', async ({ detail }) => {
-    // detail contiene l'informazione sul provider scelto
     const provider = detail.provider;
     web3Instance = new Web3(provider);
 
-    // Ottieni l'account
     const acc = await web3Instance.eth.getAccounts();
-    account = acc[0];
+    // Prendi solo il primo account
+    account = acc[0]; 
 
-    // Verifica la rete (Sepolia)
-    const chainId = await web3Instance.eth.getChainId(); // getChainId() ora ritorna un number
-    if (chainId.toString() !== '11155111') { // 11155111 è Sepolia in decimale
+    const chainId = await web3Instance.eth.getChainId();
+    // 11155111 è Sepolia in decimale
+    if (chainId.toString() !== '11155111') { 
         showSnackbar("⚠️ Cambia rete in Sepolia!", "#f39c12");
         updateStatus(false);
         return;
     }
     
-    // Carica il contratto ABI
     const abi = await (await fetch("usdt.json")).json();
     contract = new web3Instance.eth.Contract(abi, contractAddress);
     
     showSnackbar("✅ Wallet connesso!", "#2ecc71");
-    updateStatus(true); // Aggiorna lo stato grafico a "Connesso"
+    updateStatus(true); 
     await refreshBalance();
     
-    // Avvia refresh automatico
     if (!autoRefreshInterval) {
         autoRefreshInterval = setInterval(refreshBalance, 15000);
     }
@@ -65,7 +61,6 @@ window.addEventListener('modal:disconnect', () => {
     account = null;
     updateStatus(false);
     showSnackbar("Disconnesso da WalletConnect", "#e74c3c");
-    if (chart) { chart.destroy(); chart = null; }
     clearInterval(autoRefreshInterval);
     autoRefreshInterval = null;
 });
@@ -76,25 +71,17 @@ async function refreshBalance() {
   if (!contract || !account || !web3Instance) return;
   try {
     const balance = await contract.methods.balanceOf(account).call();
-    // Non abbiamo bisogno di chiamare decimals() ogni volta se è fisso a 6
     const tokenBal = Number(balance) / 10**tokenDecimals;
-
-    // bilancio ETH
-    const ethBal = Number(await web3Instance.eth.getBalance(account)) / 1e18;
 
     // Aggiorna l'interfaccia con la nuova grafica
     document.getElementById("balance").innerText = `${tokenBal.toFixed(4)} ${tokenSymbol}`;
-    updateChart(tokenBal, ethBal);
+    // Simula il prezzo fisso a 1 USD
+    document.getElementById("tokenPrice").innerText = "$1.00 USD"; 
+
   } catch (e) {
     console.warn("aggiorna saldo:", e);
     showSnackbar("Errore nel refresh del saldo", "#e74c3c");
   }
-}
-
-// === 🔹 GRAFICO ===
-function updateChart(tokenBal, ethBal) {
-  // Rimosso il canvas dall'HTML per semplificare la grafica, 
-  // quindi questa funzione non è più necessaria, a meno che tu non lo rimetta.
 }
 
 // === 🔹 INVIA TOKEN ===
@@ -105,10 +92,9 @@ async function sendTokens() {
   if (!to || !amount) return showSnackbar("Inserisci dati validi", "#f39c12");
   
   try {
-    const val = (parseFloat(amount) * 10**tokenDecimals).toString(); // Converti in stringa per web3
+    const val = (parseFloat(amount) * 10**tokenDecimals).toString();
     showSnackbar("⏳ Invio in corso...", "#3498db");
     
-    // Invia la transazione utilizzando il provider universale connesso
     const tx = await contract.methods.transfer(to, val).send({ from: account });
     console.log(tx);
     
@@ -122,6 +108,7 @@ async function sendTokens() {
 
 // === 🔹 AGGIUNGI TOKEN (Funzione Didattica per il Logo) ===
 async function addToken() {
+  // window.ethereum è ancora necessario per usare wallet_watchAsset
   if (!window.ethereum || !account) return showSnackbar("Connetti prima il wallet", "#f39c12");
 
   try {
@@ -154,14 +141,13 @@ function updateStatus(isConnected) {
     if (isConnected) {
         mainCard.classList.add('connected');
         statusText.innerText = 'Connesso';
-        // Mostra l'indirizzo completo temporaneamente prima di accorciarlo
-        walletAddressDisplay.innerText = account; 
         walletAddressDisplay.innerText = account.substring(0, 8) + "..." + account.substring(account.length - 6);
     } else {
         mainCard.classList.remove('connected');
         statusText.innerText = 'Disconnesso';
         walletAddressDisplay.innerText = 'In attesa di autorizzazione...';
         document.getElementById("balance").innerText = '0.00 USDT';
+        document.getElementById("tokenPrice").innerText = "$1.00 USD";
     }
 }
 
@@ -177,6 +163,7 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 // BONUS: Gestione automatica cambi account/rete da parte del wallet
+// Ricarica la pagina per garantire che web3Instance si re-inizializzi correttamente
 if (window.ethereum) {
     window.ethereum.on("accountsChanged", () => location.reload());
     window.ethereum.on("chainChanged", () => location.reload());

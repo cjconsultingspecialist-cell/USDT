@@ -8,7 +8,7 @@
 
   <!-- PWA -->
   <link rel="manifest" href="/USDT/manifest.json">
-  <link rel="icon" id="favicon" href="">
+  <link rel="icon" href="/USDT/icon.png">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -121,3 +121,37 @@
       padding: 12px 14px;
       border-radius: 10px;
       border: 1px solid #cbd5e1;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="brand">
+      <img src="/USDT/icon.png" alt="USDT">
+      <span>USDT</span>
+    </div>
+
+    <div class="balance-box">
+      <div class="label">Available Balance</div>
+      <div id="balance">0.00</div>
+      <div id="usdValue">$0.00 USD</div>
+    </div>
+
+    <button id="connectBtn" class="btn-primary">Connect Wallet</button>
+
+    <div id="transferBox" class="hidden">
+      <input id="to" placeholder="Recipient address">
+      <input id="amount" placeholder="Amount">
+      <button id="sendBtn" class="btn-primary">Send</button>
+      <button id="disconnectBtn" class="btn-secondary">Disconnect</button>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

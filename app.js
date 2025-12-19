@@ -1,112 +1,109 @@
-import { createAppKit } from 'cdn.jsdelivr.net'
+import { createAppKit } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.2.0/dist/appkit.esm.js';
 
 const PROJECT_ID = '42e5e216a501f010edd0dcbf77e8bbd5';
-let config = null;
-let modal = null;
-let currentSigner = null;
 
-// Gestione percorsi per GitHub Pages (repo /USDT/)
-function getAbsolutePath(relativePath) { return `/USDT/${relativePath.replace(/^\.?\//, '')}`; }
+let config;
+let modal;
+let signer;
+let provider;
 
-// ABI minima per le funzioni ERC20 (balanceOf, transfer, symbol)
-const MIN_ABI = ["function balanceOf(address) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function symbol() view returns (string)"];
+const ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function transfer(address,uint256) returns (bool)",
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)"
+];
 
+const path = p => `/USDT/${p.replace(/^\/?/,'')}`;
 
-/** Registrazione del Service Worker (PWA) */
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register(getAbsolutePath('service-worker.js'));
-    });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(path('service-worker.js'));
+  });
 }
 
-/** Caricamento dati dal file usdt.json */
-async function loadConfiguration() {
-    try {
-        const response = await fetch(getAbsolutePath('usdt.json'));
-        config = await response.json();
-        initializeUI();
-        initializeWalletConnect();
-    } catch (error) {
-        console.error("Configuration load failed", error);
+async function loadConfig() {
+  const res = await fetch(path('usdt.json'));
+  config = await res.json();
+  initUI();
+  initWallets();
+}
+
+function initUI() {
+  document.title = `${config.asset.symbol} | Asset Wallet`;
+  document.getElementById('tokenName').innerText = config.asset.name;
+  document.getElementById('tokenLogo').src = config.asset.logoURI;
+  document.getElementById('favicon').href = config.asset.logoURI;
+  document.getElementById('explorer').href =
+    `${config.network_config.explorer_url}/address/${config.asset.address}`;
+}
+
+function initWallets() {
+  modal = createAppKit({
+    projectId: PROJECT_ID,
+    networks: [{
+      id: `eip155:${config.chainId}`,
+      name: 'Ethereum',
+      rpcUrl: config.network_config.rpc_url,
+      currency: 'ETH'
+    }],
+    features: { analytics: false, socials: false, email: false }
+  });
+
+  document.getElementById('connectBtn').onclick = async () => {
+    if (window.ethereum) {
+      provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+    } else {
+      await modal.open();
+      provider = new ethers.BrowserProvider(modal.getWalletProvider());
     }
+    await onConnected();
+  };
+
+  document.getElementById('sendBtn').onclick = sendTokens;
 }
 
-function initializeUI() {
-    document.getElementById('tokenName').innerText = config.asset.name;
-    document.getElementById('tokenLogo').src = config.asset.logoURI;
-    document.getElementById('favicon').href = config.asset.logoURI;
-    document.getElementById('balance').innerText = `0.00 ${config.asset.symbol}`;
-    document.getElementById('explorerLink').href = `${config.network_config.explorer_url}/address/${config.asset.address}`;
-    document.title = `${config.asset.symbol} | Institutional Wallet`;
+async function onConnected() {
+  signer = await provider.getSigner();
+  const address = await signer.getAddress();
+
+  document.getElementById('walletLabel').innerText =
+    `${address.slice(0,6)}...${address.slice(-4)}`;
+  document.getElementById('statusDot').classList.add('online');
+  document.getElementById('connectBtn').innerText = 'Wallet Connected';
+
+  document.getElementById('sendArea').style.display = 'block';
+  document.getElementById('sendBtn').style.display = 'block';
+
+  await updateBalance();
 }
 
-function initializeWalletConnect() {
-    modal = createAppKit({
-        networks: [{ id: `eip155:${config.chainId}`, name: 'Ethereum Network', rpcUrl: config.network_config.rpc_url, currency: 'ETH' }],
-        projectId: PROJECT_ID,
-        features: { analytics: false, email: false, socials: false }
-    });
+async function updateBalance() {
+  const contract = new ethers.Contract(config.asset.address, ABI, provider);
+  const addr = await signer.getAddress();
 
-    document.getElementById('connectBtn').addEventListener('click', () => modal.open());
-    document.getElementById('sendBtn').addEventListener('click', () => {
-        const recipient = document.getElementById('recipientAddress').value;
-        const amount = document.getElementById('sendAmount').value;
-        if (recipient && amount) sendTokens(recipient, amount);
-        else alert("Inserisci indirizzo e quantità.");
-    });
+  const raw = await contract.balanceOf(addr);
+  const value = ethers.formatUnits(raw, config.asset.decimals);
 
-    modal.subscribeState(async (state) => {
-        if (state.selectedNetworkId && state.isConnected) {
-            updateAccountData();
-        } else if (!state.isConnected) {
-            document.getElementById('sendArea').style.display = 'none';
-            document.getElementById('sendBtn').style.display = 'none';
-            document.getElementById('connectBtn').innerText = 'Connect Wallet';
-            document.getElementById('statusDot').classList.remove('status-online');
-            document.getElementById('walletAddress').innerText = 'Disconnected';
-        }
-    });
+  document.getElementById('balance').innerText =
+    Number(value).toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+  document.getElementById('usdValue').innerText =
+    `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD`;
 }
 
-async function updateAccountData() {
-    if (!config) return;
-    try {
-        const provider = new ethers.BrowserProvider(window.ethereum || modal.getWalletProvider());
-        currentSigner = await provider.getSigner();
-        const address = await currentSigner.getAddress();
+async function sendTokens() {
+  const to = document.getElementById('recipient').value;
+  const amount = document.getElementById('amount').value;
 
-        document.getElementById('walletAddress').innerText = `${address.substring(0,6)}...${address.substring(38)}`;
-        document.getElementById('statusDot').classList.add('status-online');
-        document.getElementById('connectBtn').innerText = "Wallet Integrated";
-        
-        document.getElementById('sendArea').style.display = 'block';
-        document.getElementById('sendBtn').style.display = 'block';
+  const contract = new ethers.Contract(config.asset.address, ABI, signer);
+  const parsed = ethers.parseUnits(amount, config.asset.decimals);
 
+  const tx = await contract.transfer(to, parsed);
+  await tx.wait();
 
-        const contract = new ethers.Contract(config.asset.address, MIN_ABI, provider);
-        const balance = await contract.balanceOf(address);
-        const formatted = ethers.formatUnits(balance, config.asset.decimals);
-        document.getElementById('balance').innerText = `${parseFloat(formatted).toLocaleString('en-US', {minimumFractionDigits: 2})} ${config.asset.symbol}`;
-
-    } catch (err) {
-        console.error("Data synchronization error:", err);
-    }
+  await updateBalance();
 }
 
-async function sendTokens(recipient, amount) {
-    if (!currentSigner) return;
-    try {
-        const contractWithSigner = new ethers.Contract(config.asset.address, MIN_ABI, currentSigner);
-        const parsedAmount = ethers.parseUnits(amount, config.asset.decimals);
-        const tx = await contractWithSigner.transfer(recipient, parsedAmount);
-        alert("Transaction sent: " + tx.hash);
-        await tx.wait(); // Attesa conferma
-        alert("Transaction confirmed!");
-        updateAccountData(); // Aggiorna UI
-    } catch (error) {
-        console.error("Transaction error:", error);
-        alert("Transaction failed: " + (error.reason || error.message));
-    }
-}
-
-loadConfiguration();
+loadConfig();

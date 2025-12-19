@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asset Management | Institutional Interface</title>
+    <!-- Il titolo verrà aggiornato dinamicamente da app.js -->
+    <title>Asset Management | Institutional Grade</title>
     
-    <!-- Link al Manifest PWA (Percorso Assoluto) -->
+    <!-- Link al Manifest PWA (Percorso Assoluto per GitHub Pages) -->
     <link rel="manifest" href="/USDT/manifest.json">
     
     <!-- Icona dinamica (verrà aggiornata da app.js) -->
@@ -16,90 +17,30 @@
     <script src="cdnjs.cloudflare.com"></script>
 
     <style>
-        :root {
-            --primary-color: #009393;
-            --bg-gradient: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 40px 30px;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-
+        :root { --primary-color: #009393; --bg: #f8fafc; --card-bg: #ffffff; --text-main: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: var(--card-bg); padding: 40px 30px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; text-align: center; }
+        .brand { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 30px; }
         .brand img { width: 38px; height: 38px; border-radius: 50%; }
-        .brand span { font-size: 24px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
-
-        .balance-display {
-            background: #f1f5f9;
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .balance-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .brand span { font-size: 24px; font-weight: 800; color: var(--primary-color); }
+        .balance-display { background: #f1f5f9; padding: 30px; border-radius: 20px; margin-bottom: 30px; }
+        .balance-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 10px; }
         #balance { font-size: 38px; font-weight: 800; color: #0f172a; margin: 0; }
-
-        .btn-connect {
-            width: 100%;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-connect:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 147, 147, 0.3); }
-
-        .info-footer {
-            margin-top: 25px;
-            font-size: 13px;
-            color: #94a3b8;
-        }
-
+        .btn { width: 100%; border: none; padding: 18px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+        .btn-connect { background: var(--primary-color); color: white; margin-bottom: 15px; }
+        .btn-send { background: #e2e8f0; color: var(--text-main); }
+        .info-footer { margin-top: 25px; font-size: 13px; color: #94a3b8; }
         .status-dot { height: 8px; width: 8px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .status-online { background-color: #22c55e; }
-
         #walletAddress { font-family: 'Courier New', monospace; font-weight: bold; color: var(--primary-color); }
         a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+        input { width: calc(100% - 36px); padding: 12px 18px; margin-top: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; }
     </style>
 </head>
 <body>
-
     <div class="card">
         <div class="brand">
-            <img id="tokenLogo" src="" alt="Token Logo">
+            <img id="tokenLogo" src="" alt="Logo">
             <span id="tokenName">Loading...</span>
         </div>
 
@@ -108,7 +49,13 @@
             <div id="balance">0.00 --</div>
         </div>
 
-        <button class="btn-connect" id="connectBtn">Connect Wallet</button>
+        <div id="sendArea" style="display: none; margin-bottom: 15px;">
+            <input type="text" id="recipientAddress" placeholder="Recipient Address (0x...)" required>
+            <input type="text" id="sendAmount" placeholder="Amount" required>
+        </div>
+        
+        <button class="btn btn-connect" id="connectBtn">Connect Wallet</button>
+        <button class="btn btn-send" id="sendBtn" style="display: none;">Send Tokens</button>
 
         <div class="info-footer">
             <div><span id="statusDot" class="status-dot"></span> Status: <span id="walletAddress">Disconnected</span></div>
@@ -117,7 +64,7 @@
             </div>
         </div>
     </div>
-
+    <!-- Importa lo script principale con percorso assoluto per GitHub Pages -->
     <script type="module" src="/USDT/app.js"></script>
 </body>
 </html>

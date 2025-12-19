@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tether USD | Institutional Wallet Connect</title>
+    <title>Asset Management | Institutional Interface</title>
     
-    <!-- Asset grafici istituzionali -->
-    <link rel="icon" href="cryptologos.cc">
+    <link rel="icon" id="favicon" href="">
     <link href="fonts.googleapis.com" rel="stylesheet">
-    
-    <!-- Ethers.js v6 per interazione blockchain -->
     <script src="cdnjs.cloudflare.com"></script>
 
     <style>
         :root {
-            --tether-green: #009393;
+            --primary-color: #009393;
             --bg-gradient: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
             --card-bg: #ffffff;
             --text-main: #1e293b;
@@ -46,12 +43,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 30px;
         }
 
-        .brand img { width: 35px; height: 35px; }
-        .brand span { font-size: 22px; font-weight: 800; color: var(--tether-green); letter-spacing: -0.5px; }
+        .brand img { width: 38px; height: 38px; border-radius: 50%; }
+        .brand span { font-size: 24px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
 
         .balance-display {
             background: #f1f5f9;
@@ -66,7 +63,7 @@
 
         .btn-connect {
             width: 100%;
-            background: var(--tether-green);
+            background: var(--primary-color);
             color: white;
             border: none;
             padding: 18px;
@@ -75,7 +72,6 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 147, 147, 0.2);
         }
 
         .btn-connect:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 147, 147, 0.3); }
@@ -89,88 +85,34 @@
         .status-dot { height: 8px; width: 8px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .status-online { background-color: #22c55e; }
 
-        #walletAddress { font-family: 'Courier New', monospace; font-weight: bold; color: var(--tether-green); }
-        a { color: var(--tether-green); text-decoration: none; font-weight: 600; }
+        #walletAddress { font-family: 'Courier New', monospace; font-weight: bold; color: var(--primary-color); }
+        a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <div class="card">
         <div class="brand">
-            <img src="cryptologos.cc" alt="USDT">
-            <span>Tether USD</span>
+            <img id="tokenLogo" src="" alt="">
+            <span id="tokenName">Loading...</span>
         </div>
 
         <div class="balance-display">
-            <div class="balance-label">Disponibilità Attuale</div>
-            <div id="balance">0.00 USDT</div>
+            <div class="balance-label">Available Balance</div>
+            <div id="balance">0.00 --</div>
         </div>
 
-        <button class="btn-connect" id="connectBtn">Connetti Wallet</button>
+        <button class="btn-connect" id="connectBtn">Connect Wallet</button>
 
         <div class="info-footer">
-            <div><span id="statusDot" class="status-dot"></span> Stato: <span id="walletAddress">Disconnesso</span></div>
+            <div><span id="statusDot" class="status-dot"></span> Status: <span id="walletAddress">Disconnected</span></div>
             <div style="margin-top: 10px;">
-                Network: <a href="sepolia.etherscan.io" target="_blank">Ethereum Sepolia</a>
+                Network: <a href="" id="explorerLink" target="_blank">Blockchain Explorer</a>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { createAppKit } from 'cdn.jsdelivr.net'
-
-        // I tuoi dati inseriti correttamente
-        const projectId = '42e5e216a501f010edd0dcbf77e8bbd5'; 
-        const CONTRACT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D"; 
-
-        const modal = createAppKit({
-            networks: [{
-                id: 'eip155:11155111',
-                name: 'Sepolia',
-                rpcUrl: 'https://rpc.sepolia.org',
-                currency: 'ETH'
-            }],
-            projectId,
-            features: { analytics: false, email: false, socials: false }
-        });
-
-        const connectBtn = document.getElementById('connectBtn');
-        const walletAddrSpan = document.getElementById('walletAddress');
-        const statusDot = document.getElementById('statusDot');
-        const balanceDiv = document.getElementById('balance');
-
-        connectBtn.addEventListener('click', () => modal.open());
-
-        // Listener per cambio stato connessione
-        modal.subscribeState(async (state) => {
-            if (state.selectedNetworkId) {
-                await updateUI();
-            }
-        });
-
-        async function updateUI() {
-            try {
-                // Utilizzo del provider Ethers v6
-                const provider = new ethers.BrowserProvider(window.ethereum || modal.getWalletProvider());
-                const signer = await provider.getSigner();
-                const address = await signer.getAddress();
-
-                walletAddrSpan.innerText = address.substring(0,6) + "..." + address.substring(38);
-                statusDot.classList.add('status-online');
-                connectBtn.innerText = "Wallet Collegato";
-
-                // Chiamata allo Smart Contract
-                const abi = ["function balanceOf(address) view returns (uint256)"];
-                const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
-                const balance = await contract.balanceOf(address);
-                
-                // Formattazione a 6 decimali (standard USDT)
-                const formatted = Number(balance) / 1000000;
-                balanceDiv.innerText = formatted.toLocaleString('en-US', {minimumFractionDigits: 2}) + " USDT";
-            } catch (err) {
-                console.error("Errore nel caricamento dati:", err);
-            }
-        }
-    </script>
+    <!-- Script principale caricato come modulo -->
+    <script type="module" src="./app.js"></script>
 </body>
 </html>

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Asset Wallet | Institutional Interface</title>
 
   <!-- PWA -->
@@ -18,92 +19,122 @@
   <style>
     :root {
       --primary: #26a17b;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
+      --bg: #ffffff;
+      --card: #f6f8fa;
+      --text: #0a0f14;
+      --muted: #6b7280;
+      --border: #e5e7eb;
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f2f4f6;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
+
     .card {
       width: 100%;
       max-width: 420px;
-      background: var(--card);
-      border-radius: 24px;
-      padding: 36px 30px;
-      box-shadow: 0 25px 40px rgba(0,0,0,.08);
-      text-align: center;
+      background: var(--bg);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
     }
+
     .brand {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      margin-bottom: 30px;
+      gap: 10px;
+      margin-bottom: 28px;
     }
+
     .brand img {
-      width: 42px;
-      height: 42px;
+      width: 36px;
+      height: 36px;
     }
+
     .brand span {
-      font-size: 26px;
-      font-weight: 800;
+      font-size: 24px;
+      font-weight: 700;
       color: var(--primary);
     }
+
     .balance-box {
-      background: #f1f5f9;
-      border-radius: 18px;
-      padding: 28px;
-      margin-bottom: 25px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
     }
+
     .label {
       font-size: 12px;
       font-weight: 600;
       color: var(--muted);
-      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
       text-transform: uppercase;
     }
+
     #balance {
-      font-size: 38px;
+      font-size: 40px;
       font-weight: 800;
+      margin: 6px 0;
+      color: var(--text);
     }
+
     #usdValue {
       font-size: 14px;
       color: var(--muted);
-      margin-top: 6px;
     }
+
     input {
       width: 100%;
       padding: 14px;
       border-radius: 12px;
-      border: 1px solid #cbd5e1;
-      margin-bottom: 14px;
+      border: 1px solid var(--border);
       font-size: 15px;
+      margin-bottom: 14px;
+      outline: none;
     }
+
+    input::placeholder {
+      color: #9ca3af;
+    }
+
     button {
       width: 100%;
-      padding: 16px;
+      padding: 15px;
       border-radius: 14px;
       font-size: 16px;
       font-weight: 700;
       border: none;
       cursor: pointer;
+      transition: opacity 0.2s ease;
     }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .btn-primary {
       background: var(--primary);
-      color: #fff;
-      margin-bottom: 12px;
+      color: #ffffff;
+      margin-bottom: 10px;
     }
+
     .btn-secondary {
-      background: #e2e8f0;
+      background: #eef2f6;
       color: var(--text);
     }
   </style>
@@ -122,8 +153,8 @@
       <div id="usdValue">$0.00 USD</div>
     </div>
 
-    <input id="to" placeholder="Recipient address">
-    <input id="amount" placeholder="Amount">
+    <input id="to" type="text" placeholder="Recipient address">
+    <input id="amount" type="number" placeholder="Amount">
 
     <button class="btn-primary" onclick="send()">Send</button>
     <button class="btn-secondary" onclick="disconnect()">Disconnect</button>

@@ -1,21 +1,37 @@
+import { ethers } from "ethers";
+
+/* ================= CONFIG ================= */
+
 let provider;
 let signer;
 let account;
-let contract;
+let token;
+let amm;
 
 const TOKEN_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
-const TOKEN_SYMBOL = "USDT";
-const TOKEN_DECIMALS = 6;
-const TOKEN_IMAGE = "https://cryptologos.cc/logos/tether-usdt-logo.png";
+const AMM_ADDRESS   = "0x9679Dd5a0f628773Db4Ede7C476ee2cc69140d6D";
 
-const ABI = [
+const TOKEN_DECIMALS = 6;
+const TOKEN_SYMBOL = "USDT";
+const TOKEN_IMAGE =
+  "https://cryptologos.cc/logos/tether-usdt-logo.png";
+
+const TOKEN_ABI = [
   "function balanceOf(address) view returns (uint256)",
-  "function transfer(address,uint256) returns (bool)"
+  "function transfer(address,uint256) returns (bool)",
+  "function approve(address,uint256) returns (bool)"
 ];
 
-async function connect() {
+const AMM_ABI = [
+  "function swapETHForTokens() payable",
+  "function swapTokensForETH(uint256 tokenIn)"
+];
+
+/* ================= CONNECT ================= */
+
+export async function connect() {
   if (!window.ethereum) {
-    alert("Wallet not available");
+    alert("MetaMask non disponibile");
     return;
   }
 
@@ -26,15 +42,19 @@ async function connect() {
 
   const network = await provider.getNetwork();
   if (network.chainId !== 11155111n) {
-    alert("Please connect to Ethereum Sepolia");
+    alert("Usa Sepolia");
     return;
   }
 
   await importToken();
 
-  contract = new ethers.Contract(TOKEN_ADDRESS, ABI, signer);
+  token = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
+  amm   = new ethers.Contract(AMM_ADDRESS, AMM_ABI, signer);
+
   updateBalance();
 }
+
+/* ================= IMPORT TOKEN ================= */
 
 async function importToken() {
   try {
@@ -50,63 +70,70 @@ async function importToken() {
         }
       }
     });
-  } catch (e) {
-    console.log("Token import skipped");
-  }
+  } catch {}
 }
+
+/* ================= BALANCE ================= */
 
 async function updateBalance() {
-  const raw = await contract.balanceOf(account);
-  const balance = Number(ethers.formatUnits(raw, TOKEN_DECIMALS));
+  const raw = await token.balanceOf(account);
+  const bal = Number(
+    ethers.formatUnits(raw, TOKEN_DECIMALS)
+  );
 
   document.getElementById("balance").innerText =
-    balance.toLocaleString(undefined, { minimumFractionDigits: 2 });
+    bal.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
   document.getElementById("usdValue").innerText =
-    `$${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })} USD`;
+    `$${bal.toFixed(2)} USD`;
 }
 
-async function send() {
-  const sendButton = document.querySelector(".btn-primary");
+/* ================= SEND TOKEN ================= */
 
-  try {
-    // 🔒 HARDENING: disabilita il bottone durante la transazione
-    sendButton.disabled = true;
+export async function send() {
+  const to = document.getElementById("to").value;
+  const amount = document.getElementById("amount").value;
 
-    const to = document.getElementById("to").value;
-    const amount = document.getElementById("amount").value;
+  const value = ethers.parseUnits(amount, TOKEN_DECIMALS);
+  const tx = await token.transfer(to, value);
+  await tx.wait();
 
-    if (!ethers.isAddress(to)) {
-      alert("Invalid recipient address");
-      return;
-    }
-
-    if (!amount || Number(amount) <= 0) {
-      alert("Invalid amount");
-      return;
-    }
-
-    const value = ethers.parseUnits(amount, TOKEN_DECIMALS);
-    const tx = await contract.transfer(to, value);
-
-    // Attende conferma blockchain (UX reale)
-    await tx.wait();
-
-    updateBalance();
-
-  } catch (error) {
-    console.error(error);
-    alert("Transaction failed");
-
-  } finally {
-    // 🔓 riabilita il bottone SEMPRE
-    sendButton.disabled = false;
-  }
+  updateBalance();
 }
 
-function disconnect() {
+/* =================================================
+   🔥 C2 – BUY / SELL TOKEN CON ETH
+================================================= */
+
+/* ===== BUY: ETH → USDT ===== */
+export async function buy() {
+  const ethAmount = document.getElementById("ethBuy").value;
+
+  const tx = await amm.swapETHForTokens({
+    value: ethers.parseEther(ethAmount)
+  });
+
+  await tx.wait();
+  updateBalance();
+}
+
+/* ===== SELL: USDT → ETH ===== */
+export async function sell() {
+  const tokenAmount = document.getElementById("tokenSell").value;
+  const value = ethers.parseUnits(tokenAmount, TOKEN_DECIMALS);
+
+  // approve SOLO per questa vendita
+  const approveTx = await token.approve(AMM_ADDRESS, value);
+  await approveTx.wait();
+
+  const tx = await amm.swapTokensForETH(value);
+  await tx.wait();
+
+  updateBalance();
+}
+
+/* ================= DISCONNECT ================= */
+
+export function disconnect() {
   location.reload();
 }
-
-// Auto-connect on load
-connect();

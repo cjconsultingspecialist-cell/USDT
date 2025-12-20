@@ -1,32 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Official Tether USD Wallet</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#26A17B">
+  <meta charset="UTF-8">
+  <title>Tether USD DApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="stylesheet" href="style.css">
 
-  <!-- ETHERS -->
+  <!-- ETHERS v5 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
-  <!-- WALLETCONNECT -->
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-
 </head>
 <body>
 
   <div class="app">
-
     <div class="header">
       <img src="https://cryptologos.cc/logos/tether-usdt-logo.png">
       <h1>Tether USD</h1>
     </div>
 
-    <button class="btn primary" onclick="connectWallet()">
-      Connect Wallet
+    <button class="btn primary" onclick="connect()">
+      Connect MetaMask
     </button>
 
     <div class="card">
@@ -34,19 +27,8 @@
       <div class="balance" id="balance">0.00</div>
       <div class="usd" id="usd">$0.00 USD</div>
     </div>
-
-    <div class="card">
-      <h2>Send USDT</h2>
-
-      <input id="to" placeholder="Recipient address">
-      <input id="amount" placeholder="Amount">
-
-      <button class="btn secondary" onclick="sendUSDT()">Send</button>
-    </div>
-
   </div>
 
   <script src="app.js"></script>
-
 </body>
 </html>

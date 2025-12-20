@@ -1,0 +1,89 @@
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f5f7f6;
+}
+
+.app {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.header img {
+  width: 42px;
+  height: 42px;
+}
+
+.header h1 {
+  font-size: 22px;
+  color: #26a17b;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #1a7f63;
+}
+
+.balance {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.usd {
+  color: #555;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.primary {
+  background: #26a17b;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.secondary {
+  background: #1a7f63;
+  color: white;
+}
+
+.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

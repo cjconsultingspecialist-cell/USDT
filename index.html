@@ -2,164 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Asset Wallet | Institutional Interface</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="/USDT/manifest.json">
-  <link rel="icon" href="/USDT/wallet_icon.png">
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Ethers v6 -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <title>USDT Demo DApp</title>
+  <script type="module" src="./app.js"></script>
 
   <style>
-    :root {
-      --primary: #26a17b;
-      --bg: #ffffff;
-      --card: #f6f8fa;
-      --text: #0a0f14;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f2f4f6;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 30px;
     }
 
-    .card {
+    .box {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+    }
+
+    button {
+      padding: 10px;
       width: 100%;
-      max-width: 420px;
-      background: var(--bg);
-      border-radius: 20px;
-      padding: 32px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 28px;
-    }
-
-    .brand img {
-      width: 36px;
-      height: 36px;
-    }
-
-    .brand span {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .balance-box {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-
-    #balance {
-      font-size: 40px;
-      font-weight: 800;
-      margin: 6px 0;
-      color: var(--text);
-    }
-
-    #usdValue {
-      font-size: 14px;
-      color: var(--muted);
+      margin-top: 10px;
+      cursor: pointer;
     }
 
     input {
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      font-size: 15px;
-      margin-bottom: 14px;
-      outline: none;
+      padding: 8px;
+      margin-top: 8px;
     }
 
-    input::placeholder {
-      color: #9ca3af;
-    }
-
-    button {
-      width: 100%;
-      padding: 15px;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s ease;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #ffffff;
-      margin-bottom: 10px;
-    }
-
-    .btn-secondary {
-      background: #eef2f6;
-      color: var(--text);
+    h2 {
+      margin-top: 0;
     }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <div class="brand">
-      <img src="/USDT/wallet_icon.png" alt="USDT">
-      <span>USDT</span>
-    </div>
 
-    <div class="balance-box">
-      <div class="label">Available Balance</div>
-      <div id="balance">0.00</div>
-      <div id="usdValue">$0.00 USD</div>
-    </div>
-
-    <input id="to" type="text" placeholder="Recipient address">
-    <input id="amount" type="number" placeholder="Amount">
-
-    <button class="btn-primary" onclick="send()">Send</button>
-    <button class="btn-secondary" onclick="disconnect()">Disconnect</button>
+  <!-- CONNECT -->
+  <div class="box">
+    <button onclick="connect()">🔌 Connect Wallet</button>
   </div>
 
-  <script src="/USDT/app.js"></script>
+  <!-- BALANCE -->
+  <div class="box">
+    <h2>Balance</h2>
+    <div><strong id="balance">0.00</strong> USDT</div>
+    <div id="usdValue">$0.00 USD</div>
+  </div>
+
+  <!-- SEND TOKEN -->
+  <div class="box">
+    <h2>Send USDT</h2>
+    <input id="to" placeholder="Recipient address" />
+    <input id="amount" placeholder="Amount" />
+    <button onclick="send()">Send</button>
+  </div>
+
+  <!-- BUY -->
+  <div class="box">
+    <h2>Buy USDT (ETH → USDT)</h2>
+    <input id="ethBuy" placeholder="ETH amount (e.g. 0.01)" />
+    <button onclick="buy()">Buy</button>
+  </div>
+
+  <!-- SELL -->
+  <div class="box">
+    <h2>Sell USDT (USDT → ETH)</h2>
+    <input id="tokenSell" placeholder="USDT amount (e.g. 10)" />
+    <button onclick="sell()">Sell</button>
+  </div>
+
 </body>
 </html>

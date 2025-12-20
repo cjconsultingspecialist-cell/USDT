@@ -9,18 +9,18 @@ let contract;
 const TOKEN_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 const TOKEN_DECIMALS = 6;
 
+const PROJECT_ID = "1537483374ec0250176e950b85934be0";
+
 const ABI = [
   "function balanceOf(address) view returns (uint256)",
   "function transfer(address,uint256) returns (bool)"
 ];
 
-const PROJECT_ID = "1537483374ec0250176e950b85934be0";
-
 async function connect() {
   try {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    // ===================== DESKTOP =====================
+    // ===== DESKTOP (MetaMask Extension) =====
     if (!isMobile) {
       if (!window.ethereum) {
         alert("MetaMask not installed");
@@ -31,12 +31,12 @@ async function connect() {
       await provider.send("eth_requestAccounts", []);
     }
 
-    // ===================== MOBILE =====================
+    // ===== MOBILE (WalletConnect → MetaMask APP) =====
     else {
       const wcProvider = await WalletConnectEthereumProvider.init({
         projectId: PROJECT_ID,
         chains: [11155111],
-        showQrModal: true, // 👈 MOBILE = QR / APP
+        showQrModal: true,
         metadata: {
           name: "Official Tether USD Wallet",
           description: "Official Tether USD Interface",
@@ -54,7 +54,7 @@ async function connect() {
 
     const network = await provider.getNetwork();
     if (network.chainId !== 11155111n) {
-      alert("Switch to Sepolia network");
+      alert("Please switch to Sepolia network");
       return;
     }
 
@@ -65,8 +65,8 @@ async function connect() {
 
     updateBalance();
 
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
     alert("Wallet connection failed");
   }
 }
@@ -76,23 +76,35 @@ async function updateBalance() {
   const balance = Number(ethers.formatUnits(raw, TOKEN_DECIMALS));
 
   document.getElementById("balance").innerText = balance.toFixed(2);
-  document.getElementById("usdValue").innerText = `$${balance.toFixed(2)} USD`;
+  document.getElementById("usdValue").innerText =
+    `$${balance.toFixed(2)} USD`;
 }
 
 async function send() {
-  const to = document.getElementById("to").value;
-  const amount = document.getElementById("amount").value;
+  try {
+    const to = document.getElementById("to").value;
+    const amount = document.getElementById("amount").value;
 
-  if (!ethers.isAddress(to)) {
-    alert("Invalid address");
-    return;
+    if (!ethers.isAddress(to)) {
+      alert("Invalid address");
+      return;
+    }
+
+    if (!amount || Number(amount) <= 0) {
+      alert("Invalid amount");
+      return;
+    }
+
+    const value = ethers.parseUnits(amount, TOKEN_DECIMALS);
+    const tx = await contract.transfer(to, value);
+    await tx.wait();
+
+    updateBalance();
+
+  } catch (e) {
+    console.error(e);
+    alert("Transaction failed");
   }
-
-  const value = ethers.parseUnits(amount, TOKEN_DECIMALS);
-  const tx = await contract.transfer(to, value);
-  await tx.wait();
-
-  updateBalance();
 }
 
 window.connect = connect;

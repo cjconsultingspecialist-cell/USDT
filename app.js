@@ -1,33 +1,51 @@
+import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.14.0/+esm";
+import WalletConnectEthereumProvider from "https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.0/+esm";
+
+let provider;
+let signer;
+let account;
+let contract;
+
+const TOKEN_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
+const TOKEN_DECIMALS = 6;
+
+const ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function transfer(address,uint256) returns (bool)"
+];
+
+const PROJECT_ID = "1537483374ec0250176e950b85934be0";
+
 async function connect() {
   try {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    // ================= DESKTOP =================
-    if (!isMobile && window.ethereum) {
+    // ===================== DESKTOP =====================
+    if (!isMobile) {
+      if (!window.ethereum) {
+        alert("MetaMask not installed");
+        return;
+      }
+
       provider = new ethers.BrowserProvider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
     }
-    // ================= MOBILE =================
+
+    // ===================== MOBILE =====================
     else {
       const wcProvider = await WalletConnectEthereumProvider.init({
-        projectId: "1537483374ec0250176e950b85934be0",
+        projectId: PROJECT_ID,
         chains: [11155111],
-        showQrModal: false, // 🔴 NIENTE QR
+        showQrModal: true, // 👈 MOBILE = QR / APP
         metadata: {
           name: "Official Tether USD Wallet",
-          description: "Institutional Tether USD Interface",
+          description: "Official Tether USD Interface",
           url: "https://cjconsultingspecialist-cell.github.io/USDT/",
           icons: ["https://cryptologos.cc/logos/tether-usdt-logo.png"]
         }
       });
 
-      // 🔴 QUESTO FORZA L’APERTURA DELL’APP WALLET
-      await wcProvider.connect({
-        chains: [11155111],
-        optionalChains: [],
-        rpcMap: {}
-      });
-
+      await wcProvider.enable();
       provider = new ethers.BrowserProvider(wcProvider);
     }
 
@@ -36,7 +54,7 @@ async function connect() {
 
     const network = await provider.getNetwork();
     if (network.chainId !== 11155111n) {
-      alert("Please switch to Ethereum Sepolia");
+      alert("Switch to Sepolia network");
       return;
     }
 
@@ -47,8 +65,35 @@ async function connect() {
 
     updateBalance();
 
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     alert("Wallet connection failed");
   }
 }
+
+async function updateBalance() {
+  const raw = await contract.balanceOf(account);
+  const balance = Number(ethers.formatUnits(raw, TOKEN_DECIMALS));
+
+  document.getElementById("balance").innerText = balance.toFixed(2);
+  document.getElementById("usdValue").innerText = `$${balance.toFixed(2)} USD`;
+}
+
+async function send() {
+  const to = document.getElementById("to").value;
+  const amount = document.getElementById("amount").value;
+
+  if (!ethers.isAddress(to)) {
+    alert("Invalid address");
+    return;
+  }
+
+  const value = ethers.parseUnits(amount, TOKEN_DECIMALS);
+  const tx = await contract.transfer(to, value);
+  await tx.wait();
+
+  updateBalance();
+}
+
+window.connect = connect;
+window.send = send;

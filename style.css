@@ -14,6 +14,7 @@ body {
   padding: 16px;
 }
 
+/* HEADER */
 .header {
   display: flex;
   align-items: center;
@@ -31,12 +32,13 @@ body {
   color: #26a17b;
 }
 
+/* CARD */
 .card {
   background: white;
   border-radius: 16px;
   padding: 16px;
   margin-bottom: 16px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
 h2 {
@@ -45,6 +47,7 @@ h2 {
   color: #1a7f63;
 }
 
+/* BALANCE */
 .balance {
   font-size: 26px;
   font-weight: bold;
@@ -54,6 +57,7 @@ h2 {
   color: #555;
 }
 
+/* INPUT */
 input {
   width: 100%;
   padding: 12px;
@@ -63,27 +67,24 @@ input {
   font-size: 16px;
 }
 
-.btn {
+/* 🔥 BOTTONI — FUNZIONANO ANCHE SENZA CLASSI */
+button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
+  margin-top: 10px;
   border-radius: 999px;
   border: none;
   font-size: 16px;
   cursor: pointer;
-}
-
-.primary {
   background: #26a17b;
   color: white;
-  margin-bottom: 16px;
 }
 
-.secondary {
+button:hover {
   background: #1a7f63;
-  color: white;
 }
 
-.disabled {
+button:disabled {
   background: #ccc;
   cursor: not-allowed;
 }

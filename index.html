@@ -4,63 +4,49 @@
   <meta charset="UTF-8" />
   <title>Official Tether USD Wallet</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#26A17B">
 
-  <!-- Tether colors -->
-  <meta name="theme-color" content="#26A17B" />
+  <link rel="stylesheet" href="style.css">
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css" />
+  <!-- ETHERS -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <!-- WALLETCONNECT -->
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
 
 </head>
 <body>
 
   <div class="app">
 
-    <!-- HEADER -->
     <div class="header">
-      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT" />
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png">
       <h1>Tether USD</h1>
     </div>
 
-    <!-- CONNECT -->
-    <button id="connectBtn" class="btn primary" onclick="connect()">
+    <button class="btn primary" onclick="connectWallet()">
       Connect Wallet
     </button>
 
-    <!-- BALANCE -->
     <div class="card">
       <h2>Balance</h2>
       <div class="balance" id="balance">0.00</div>
-      <div class="usd" id="usdValue">$0.00 USD</div>
+      <div class="usd" id="usd">$0.00 USD</div>
     </div>
 
-    <!-- SEND -->
     <div class="card">
       <h2>Send USDT</h2>
 
-      <input
-        id="to"
-        type="text"
-        placeholder="Recipient address"
-      />
+      <input id="to" placeholder="Recipient address">
+      <input id="amount" placeholder="Amount">
 
-      <input
-        id="amount"
-        type="number"
-        step="0.01"
-        placeholder="Amount"
-      />
-
-      <button class="btn secondary" onclick="send()">
-        Send
-      </button>
+      <button class="btn secondary" onclick="sendUSDT()">Send</button>
     </div>
 
   </div>
 
-  <!-- APP -->
-  <script type="module" src="app.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>

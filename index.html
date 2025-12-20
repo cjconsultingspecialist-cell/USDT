@@ -3,16 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>USDT – Sepolia</title>
+  <title>USDT DApp</title>
 
+  <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
+
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
 </head>
 <body>
 
   <div class="app">
 
-    <!-- HEADER -->
-    <header class="header">
-      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT" />
-      <h1>USDT Sepolia</h1>
+    <div class="header">
+      <img src="USDT.jpg" alt="USDT Logo">
+      <h1>USDT</h1>
+    </div>
+
+    <div class="card">
+      <button id="connectBtn">🔌 Connect Wallet</button>
+    </div>
+
+    <div class="card">
+      <h2>Balance</h2>
+      <div class="balance" id="balance">0.00 USDT</div>
+      <div class="usd" id="usdValu

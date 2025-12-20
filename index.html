@@ -2,61 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-
   <title>Official Tether USD Wallet</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="wallet_icon.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tether colors -->
+  <meta name="theme-color" content="#26A17B" />
 
-  <!-- Ethers v6 -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
 
-  <!-- 🔴 WALLETCONNECT (QUESTA ERA LA STRINGA MANCANTE / SBAGLIATA) -->
-  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.1/dist/index.umd.js"></script>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+
   <div class="app">
 
     <!-- HEADER -->
     <div class="header">
-      <img src="wallet_icon.jpg" alt="USDT Logo">
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT" />
       <h1>Tether USD</h1>
     </div>
 
     <!-- CONNECT -->
-    <div class="card">
-      <button id="connectBtn" class="btn primary" onclick="connect()">
-        Connect Wallet
-      </button>
-    </div>
+    <button id="connectBtn" class="btn primary" onclick="connect()">
+      Connect Wallet
+    </button>
 
     <!-- BALANCE -->
     <div class="card">
       <h2>Balance</h2>
-      <div id="balance" class="balance">0.00 USDT</div>
-      <div id="usdValue" class="usd">$0.00 USD</div>
+      <div class="balance" id="balance">0.00</div>
+      <div class="usd" id="usdValue">$0.00 USD</div>
     </div>
 
     <!-- SEND -->
     <div class="card">
-      <h2>Transfer</h2>
-      <input id="to" type="text" placeholder="Recipient address">
-      <input id="amount" type="number" placeholder="Amount">
-      <button class="btn secondary" onclick="send()">Send</button>
+      <h2>Send USDT</h2>
+
+      <input
+        id="to"
+        type="text"
+        placeholder="Recipient address"
+      />
+
+      <input
+        id="amount"
+        type="number"
+        step="0.01"
+        placeholder="Amount"
+      />
+
+      <button class="btn secondary" onclick="send()">
+        Send
+      </button>
     </div>
 
   </div>
 
-  <!-- APP LOGIC (DEVE STARE PER ULTIMO) -->
-  <script src="app.js"></script>
+  <!-- APP -->
+  <script type="module" src="app.js"></script>
+
 </body>
 </html>

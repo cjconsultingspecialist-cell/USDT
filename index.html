@@ -5,10 +5,11 @@
   <title>Tether USDToken</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- ethers v6 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
 
   <style>
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Inter, Arial, sans-serif;
@@ -18,48 +19,69 @@
       align-items: center;
       min-height: 100vh;
     }
+
     .card {
       background: #fff;
       border-radius: 24px;
       padding: 24px;
-      width: 360px;
+      width: 380px;
       box-shadow: 0 20px 40px rgba(0,0,0,.08);
     }
-    h1 {
+
+    .header {
       display: flex;
       align-items: center;
       gap: 12px;
-      color: #4fa37c;
       margin-bottom: 20px;
     }
-    h1 img {
-      width: 40px;
+
+    .header img {
+      width: 42px;
+      height: 42px;
     }
+
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+      color: #5aa37f;
+    }
+
     button {
       width: 100%;
       border: none;
-      padding: 14px;
+      padding: 16px;
       border-radius: 999px;
       font-size: 16px;
       cursor: pointer;
       margin-bottom: 12px;
-      background: #5aa37f;
       color: #fff;
     }
-    .secondary {
-      background: #3f7ad6;
-    }
+
+    .btn-mm { background: #5aa37f; }
+    .btn-native { background: #4f78d6; }
+    .btn-send { background: #5aa37f; margin-top: 12px; }
+
     .box {
       background: #f0f3f1;
       border-radius: 18px;
       padding: 16px;
       margin-top: 16px;
     }
+
+    .label {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
     .address {
       word-break: break-all;
       font-size: 14px;
-      color: #333;
     }
+
+    .stat {
+      margin: 4px 0;
+    }
+
     input {
       width: 100%;
       padding: 14px;
@@ -73,31 +95,33 @@
 
 <body>
   <div class="card">
-    <h1>
-      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" />
-      Tether USDToken
-    </h1>
 
-    <button onclick="connectMetaMask()">Connect MetaMask</button>
-    <button class="secondary" onclick="generateWallet()">Generate Native Wallet</button>
+    <div class="header">
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" />
+      <h1>Tether USDToken</h1>
+    </div>
+
+    <button class="btn-mm" onclick="connectMetaMask()">Connect MetaMask</button>
+    <button class="btn-native" onclick="generateWallet()">Generate Native Wallet</button>
 
     <div class="box">
-      <strong>Active Address:</strong>
-      <div id="tellAddress" class="address">—</div>
+      <div class="label">Active Address</div>
+      <div id="activeAddress" class="address">—</div>
     </div>
 
     <div class="box">
-      <div><strong>Wallet Value:</strong> <span id="walletValue">$0.00</span></div>
-      <div>USDT Balance: <span id="walletBalance">0.00</span></div>
-      <div>USDT Price: <span id="usdtPrice">--</span></div>
-      <div>ETH Price: <span id="ethPrice">--</span></div>
+      <div class="stat"><strong>Wallet Value:</strong> <span id="walletValue">$0.00</span></div>
+      <div class="stat">USDT Balance: <span id="walletBalance">0.00</span></div>
+      <div class="stat">USDT Price: <span id="usdtPrice">$1.00</span></div>
+      <div class="stat">ETH Price: <span id="ethPrice">$3000.00</span></div>
     </div>
 
     <div class="box">
       <input id="to" placeholder="Recipient address" />
       <input id="amount" placeholder="Amount USDT" />
-      <button onclick="sendUSDT()">Send USDT</button>
+      <button class="btn-send" onclick="sendUSDT()">Send USDT</button>
     </div>
+
   </div>
 
   <script src="./app.js"></script>

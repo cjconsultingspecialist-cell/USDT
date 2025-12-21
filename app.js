@@ -1,3 +1,5 @@
+import WalletConnectProvider from "https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.0/dist/index.min.js";
+
 let provider;
 let signer;
 let account;
@@ -11,14 +13,27 @@ const USDT_ABI = [
   "function transfer(address,uint256) returns (bool)"
 ];
 
+// ⚠️ CAMBIA SOLO QUESTO CON UN PROJECT ID REALE (WalletConnect)
+const WC_PROJECT_ID = "YOUR_PROJECT_ID";
+
 async function connectWallet() {
-  if (!window.ethereum) {
-    alert("Open this DApp from MetaMask browser");
-    return;
+  let ethProvider;
+
+  if (window.ethereum) {
+    ethProvider = window.ethereum;
+  } else {
+    ethProvider = await WalletConnectProvider.init({
+      projectId: WC_PROJECT_ID,
+      chains: [11155111],
+      showQrModal: true,
+      rpcMap: {
+        11155111: "https://rpc.sepolia.org"
+      }
+    });
+    await ethProvider.enable();
   }
 
-  provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
+  provider = new ethers.BrowserProvider(ethProvider);
   signer = await provider.getSigner();
   account = await signer.getAddress();
 

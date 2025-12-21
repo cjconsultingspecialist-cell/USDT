@@ -2,10 +2,93 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether Official DApp</title>
+  <title>Tether Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 420px;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 25px 40px rgba(0,0,0,.1);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .header img {
+      width: 42px;
+      height: 42px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #26a17b;
+    }
+
+    .card {
+      background: #f1f5f9;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #26a17b;
+      color: white;
+    }
+
+    .secondary {
+      background: #e2e8f0;
+    }
+
+    .balance {
+      font-size: 34px;
+      font-weight: 800;
+    }
+
+    .usd {
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 
 <body>
@@ -16,30 +99,27 @@
     </div>
 
     <div class="card">
-      <button class="btn primary" onclick="connectWallet()">Connect Wallet</button>
+      <button class="primary" onclick="connectWallet()">Connect Wallet</button>
       <p><b>Wallet:</b> <span id="wallet">-</span></p>
     </div>
 
     <div class="card">
-      <h2>Balance</h2>
       <div class="balance" id="balance">0.00</div>
       <div class="usd" id="usdValue">$0.00 USD</div>
     </div>
 
     <div class="card">
-      <h2>Prices</h2>
       <p>USDT Price: <span id="usdtPrice">--</span></p>
       <p>ETH Price: <span id="ethPrice">--</span></p>
     </div>
 
     <div class="card">
-      <h2>Send USDT</h2>
       <input id="to" placeholder="Recipient address" />
       <input id="amount" placeholder="Amount" />
-      <button class="btn secondary" onclick="sendUSDT()">Send</button>
+      <button class="secondary" onclick="sendUSDT()">Send USDT</button>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

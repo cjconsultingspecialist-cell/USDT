@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Tether USD | Institutional Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Fonts -->
-  <link href="fonts.googleapis.com" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
   <!-- Ethers v6 -->
-  <script src="cdn.jsdelivr.net"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
 
   <style>
     body {
@@ -97,23 +97,17 @@
       background: #1a7f63;
       color: #fff;
     }
-
-    .tertiary {
-      background: #e0e0e0;
-      color: #333;
-    }
   </style>
 </head>
 
-<body onload="connect()">
+<body>
   <div class="app">
     <div class="header">
-      <!-- L'URL pubblico e affidabile per l'immagine -->
-      <img src="cryptologos.cc" />
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" />
       <h1>Tether USD</h1>
     </div>
 
-    <button class="primary" onclick="connect()" style="display:none;">Connect Wallet</button>
+    <button class="primary" onclick="connect()">Connect Wallet</button>
 
     <div class="card">
       <div class="balance" id="balance">0.00</div>
@@ -124,9 +118,6 @@
     <input id="amount" placeholder="Amount USDT" />
 
     <button class="secondary" onclick="send()">Send USDT</button>
-    
-    <!-- Pulsante per la funzione didattica "Aggiungi Logo" -->
-    <button class="tertiary" onclick="addTokenToWallet()">Aggiungi Token a MetaMask</button>
   </div>
 
   <script src="app.js"></script>

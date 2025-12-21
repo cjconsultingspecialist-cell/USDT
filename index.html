@@ -2,53 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Official Tether DApp</title>
+  <title>Official Tether USD DApp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="style.css" />
+  <!-- Ethers v6 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 
-  <!-- ethers v5 -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
   <div class="app">
+
+    <div class="header">
+      <img src="USDT.jpg" alt="USDT logo">
+      <h1>Tether USD</h1>
+    </div>
+
+    <button id="connectBtn" class="btn primary">
+      Connect Wallet
+    </button>
+
     <div class="card">
-      <div class="header">
-        <img src="USDT.jpg" alt="USDT" />
-        <h1>Tether USD</h1>
+      <h2>Balance</h2>
+      <div class="balance">
+        <span id="balance">0.00</span> USDT
       </div>
+      <div class="usd" id="usdValue">$0.00 USD</div>
+    </div>
 
-      <button id="connectBtn" class="btn primary">
-        Connect Wallet
-      </button>
-
-      <div class="card">
-        <h2>Balance</h2>
-        <div class="balance">
-          <span id="tokenBalance">0.00</span> USDT
-        </div>
-        <div class="usd">
-          $<span id="usdBalance">0.00</span> USD
-        </div>
-      </div>
-
-      <input
-        id="toAddress"
-        type="text"
-        placeholder="Recipient address"
-      />
-
-      <input
-        id="amount"
-        type="number"
-        placeholder="Amount USDT"
-      />
-
+    <div class="card">
+      <h2>Send USDT</h2>
+      <input id="to" placeholder="Recipient address" />
+      <input id="amount" placeholder="Amount USDT" />
       <button id="sendBtn" class="btn secondary">
         Send USDT
       </button>
     </div>
+
   </div>
 
   <script src="app.js"></script>

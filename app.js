@@ -1,5 +1,5 @@
 // ===== CONFIG =====
-const RPC_URL = "https://sepolia.infura.io/v3/1537483374ec0250176e950b85934be0";
+const RPC_URL = "https://sepolia.infura.io/v3/YOUR_INFURA_KEY";
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 
 const USDT_ABI = [
@@ -10,62 +10,84 @@ const USDT_ABI = [
 
 // ===== GLOBAL =====
 let provider;
+let signer;
 let wallet;
 let usdt;
+let activeMode = null; // "metamask" | "native"
 
 // ===== INIT =====
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   provider = new ethers.JsonRpcProvider(RPC_URL);
   console.log("DApp loaded");
 });
 
-// ===== WALLET =====
+// ===== METAMASK =====
+async function connectMetaMask() {
+  if (!window.ethereum) {
+    alert("MetaMask not installed");
+    return;
+  }
+
+  const mmProvider = new ethers.BrowserProvider(window.ethereum);
+  await mmProvider.send("eth_requestAccounts", []);
+  signer = await mmProvider.getSigner();
+
+  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+  activeMode = "metamask";
+
+  document.getElementById("tellAddress").innerText = await signer.getAddress();
+  await updateWallet();
+}
+
+// ===== NATIVE WALLET =====
 async function generateWallet() {
   wallet = ethers.Wallet.createRandom().connect(provider);
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
+  activeMode = "native";
 
-  document.getElementById("nativeAddress").innerText = wallet.address;
+  document.getElementById("tellAddress").innerText = wallet.address;
   await updateWallet();
 }
 
 // ===== UPDATE UI =====
 async function updateWallet() {
-  if (!wallet) return;
+  if (!usdt) return;
 
   const decimals = await usdt.decimals();
-  const raw = await usdt.balanceOf(wallet.address);
-  const balance = Number(ethers.formatUnits(raw, decimals));
+  const address =
+    activeMode === "metamask"
+      ? await signer.getAddress()
+      : wallet.address;
 
-  document.getElementById("walletBalance").innerText =
-    balance.toFixed(2) + " USDT";
+  const balanceRaw = await usdt.balanceOf(address);
+  const balance = Number(ethers.formatUnits(balanceRaw, decimals));
 
-  // valori didattici stabili
   const usdtPrice = 1.0;
   const ethPrice = 3000;
 
-  document.getElementById("usdtPrice").innerText =
-    "$" + usdtPrice.toFixed(2) + " USD";
-
-  document.getElementById("ethPrice").innerText =
-    "$" + ethPrice.toFixed(2) + " USD";
-
+  document.getElementById("walletBalance").innerText = balance.toFixed(2);
+  document.getElementById("usdtPrice").innerText = "$" + usdtPrice.toFixed(2);
+  document.getElementById("ethPrice").innerText = "$" + ethPrice.toFixed(2);
   document.getElementById("walletValue").innerText =
     "$" + (balance * usdtPrice).toFixed(2);
 }
 
 // ===== SEND =====
 async function sendUSDT() {
-  if (!wallet) return alert("Generate wallet first");
+  if (!usdt) {
+    alert("Connect MetaMask or generate wallet first");
+    return;
+  }
 
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
+  if (!to || !amount) return;
 
   const decimals = await usdt.decimals();
   const tx = await usdt.transfer(
     to,
     ethers.parseUnits(amount, decimals)
   );
-
   await tx.wait();
   await updateWallet();
 }

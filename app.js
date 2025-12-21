@@ -2,86 +2,108 @@ console.log("DApp loaded");
 
 let provider;
 let signer;
-let userAddress;
+let account;
+let contract;
 
-// USDT contract (METTI QUI IL TUO INDIRIZZO)
-const USDT_ADDRESS = "0x0000000000000000000000000000000000000000";
+// === CONFIG ===
+const TOKEN_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
+const TOKEN_DECIMALS = 6;
 
-// ABI MINIMA ERC20
-const ERC20_ABI = [
+// ERC20 minimal ABI
+const ABI = [
   "function balanceOf(address) view returns (uint256)",
-  "function decimals() view returns (uint8)",
   "function transfer(address,uint256) returns (bool)"
 ];
 
-async function connectWallet() {
+// === DOM ===
+const connectBtn = document.getElementById("connectBtn");
+const sendBtn = document.getElementById("sendBtn");
+
+connectBtn.onclick = connect;
+sendBtn.onclick = sendUSDT;
+
+// === FUNCTIONS ===
+async function connect() {
   if (!window.ethereum) {
     alert("MetaMask not found");
     return;
   }
 
-  provider = new ethers.providers.Web3Provider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = provider.getSigner();
-  userAddress = await signer.getAddress();
+  try {
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
 
-  console.log("Connected:", userAddress);
+    signer = await provider.getSigner();
+    account = await signer.getAddress();
 
-  document.getElementById("connectBtn").innerText =
-    userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
+    const network = await provider.getNetwork();
+    if (network.chainId !== 11155111n) {
+      alert("Please switch to Sepolia network");
+      return;
+    }
 
-  await updateBalance();
+    contract = new ethers.Contract(
+      TOKEN_ADDRESS,
+      ABI,
+      signer
+    );
+
+    connectBtn.innerText =
+      account.slice(0, 6) + "..." + account.slice(-4);
+
+    await updateBalance();
+
+  } catch (err) {
+    console.error(err);
+    alert("Connection failed");
+  }
 }
 
 async function updateBalance() {
-  const token = new ethers.Contract(
-    USDT_ADDRESS,
-    ERC20_ABI,
-    provider
+  const raw = await contract.balanceOf(account);
+  const balance = Number(
+    ethers.formatUnits(raw, TOKEN_DECIMALS)
   );
 
-  const decimals = await token.decimals();
-  const raw = await token.balanceOf(userAddress);
-  const balance = ethers.utils.formatUnits(raw, decimals);
+  document.getElementById("balance").innerText =
+    balance.toFixed(2);
 
-  document.getElementById("tokenBalance").innerText =
-    Number(balance).toFixed(2);
-
-  document.getElementById("usdBalance").innerText =
-    Number(balance).toFixed(2);
+  document.getElementById("usdValue").innerText =
+    `$${balance.toFixed(2)} USD`;
 }
 
 async function sendUSDT() {
-  const to = document.getElementById("toAddress").value;
+  const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
 
-  if (!to || !amount) {
-    alert("Missing data");
+  if (!ethers.isAddress(to)) {
+    alert("Invalid address");
     return;
   }
 
-  const token = new ethers.Contract(
-    USDT_ADDRESS,
-    ERC20_ABI,
-    signer
-  );
+  if (!amount || Number(amount) <= 0) {
+    alert("Invalid amount");
+    return;
+  }
 
-  const decimals = await token.decimals();
-  const value = ethers.utils.parseUnits(amount, decimals);
+  try {
+    sendBtn.disabled = true;
 
-  const tx = await token.transfer(to, value);
-  await tx.wait();
+    const value = ethers.parseUnits(
+      amount,
+      TOKEN_DECIMALS
+    );
 
-  alert("Transfer completed");
-  await updateBalance();
+    const tx = await contract.transfer(to, value);
+    await tx.wait();
+
+    await updateBalance();
+    alert("Transfer completed");
+
+  } catch (err) {
+    console.error(err);
+    alert("Transaction failed");
+  } finally {
+    sendBtn.disabled = false;
+  }
 }
-
-window.addEventListener("load", () => {
-  document
-    .getElementById("connectBtn")
-    .addEventListener("click", connectWallet);
-
-  document
-    .getElementById("sendBtn")
-    .addEventListener("click", sendUSDT);
-});

@@ -3,9 +3,9 @@ console.log("DApp loaded");
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 const USDT_DECIMALS = 6;
 
-// PREZZI STABILI STEP 2
+// PREZZI DIDATTICI (STEP 2)
 const USDT_PRICE = 1.0;
-const ETH_PRICE  = 3000.0;
+const ETH_PRICE = 3000.0;
 
 const USDT_ABI = [
   "function balanceOf(address) view returns (uint256)",
@@ -38,13 +38,19 @@ async function connectWallet() {
 
 async function refreshWallet() {
   const raw = await usdt.balanceOf(account);
-  const balance = Number(ethers.utils.formatUnits(raw, USDT_DECIMALS));
+  const balance = Number(
+    ethers.utils.formatUnits(raw, USDT_DECIMALS)
+  );
 
+  // BALANCE
   document.getElementById("balance").innerText =
     balance.toFixed(2) + " USDT";
 
+  // FIX CRITICO: wallet value CALCOLATO DOPO balance
+  const walletUsdValue = balance * USDT_PRICE;
+
   document.getElementById("walletValue").innerText =
-    "Wallet Value: $" + (balance * USDT_PRICE).toFixed(2);
+    "Wallet Value: $" + walletUsdValue.toFixed(2);
 
   document.getElementById("usdtPrice").innerText =
     "USDT Price: $" + USDT_PRICE.toFixed(2) + " USD";

@@ -10,15 +10,15 @@ const USDT_ABI = [
 
 // ===== GLOBAL =====
 let provider;
-let signer;
-let wallet;
-let usdt;
-let activeMode = null; // "metamask" | "native"
+let signer = null;
+let wallet = null;
+let usdt = null;
+let mode = null; // metamask | native
 
 // ===== INIT =====
-window.addEventListener("load", async () => {
+window.addEventListener("load", () => {
   provider = new ethers.JsonRpcProvider(RPC_URL);
-  console.log("DApp loaded");
+  console.log("DApp ready");
 });
 
 // ===== METAMASK =====
@@ -33,9 +33,9 @@ async function connectMetaMask() {
   signer = await mmProvider.getSigner();
 
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-  activeMode = "metamask";
+  mode = "metamask";
 
-  document.getElementById("tellAddress").innerText = await signer.getAddress();
+  document.getElementById("activeAddress").innerText = await signer.getAddress();
   await updateWallet();
 }
 
@@ -43,24 +43,24 @@ async function connectMetaMask() {
 async function generateWallet() {
   wallet = ethers.Wallet.createRandom().connect(provider);
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
-  activeMode = "native";
+  mode = "native";
 
-  document.getElementById("tellAddress").innerText = wallet.address;
+  document.getElementById("activeAddress").innerText = wallet.address;
   await updateWallet();
 }
 
-// ===== UPDATE UI =====
+// ===== UPDATE =====
 async function updateWallet() {
   if (!usdt) return;
 
   const decimals = await usdt.decimals();
   const address =
-    activeMode === "metamask"
+    mode === "metamask"
       ? await signer.getAddress()
       : wallet.address;
 
-  const balanceRaw = await usdt.balanceOf(address);
-  const balance = Number(ethers.formatUnits(balanceRaw, decimals));
+  const raw = await usdt.balanceOf(address);
+  const balance = Number(ethers.formatUnits(raw, decimals));
 
   const usdtPrice = 1.0;
   const ethPrice = 3000;

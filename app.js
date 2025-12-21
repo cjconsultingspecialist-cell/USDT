@@ -1,6 +1,6 @@
 // ===== CONFIG =====
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
-const CHAIN_ID = 11155111;
+const CHAIN_ID = 11155111n;
 
 const USDT_ABI = [
   "function balanceOf(address) view returns (uint256)",
@@ -8,23 +8,19 @@ const USDT_ABI = [
   "function decimals() view returns (uint8)"
 ];
 
-const USDT_PRICE = 1.0;    // didattico
-const ETH_PRICE = 3000.0; // didattico
-
 // ===== GLOBAL =====
 let provider;
 let signer;
 let account;
 let usdt;
+let decimals = 6;
 
-// ===== DOM READY =====
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("connectBtn").addEventListener("click", connectMetaMask);
-  document.getElementById("sendBtn").addEventListener("click", sendUSDT);
-});
+// ===== UI =====
+const connectBtn = document.getElementById("connectBtn");
+const sendBtn = document.getElementById("sendBtn");
 
 // ===== CONNECT =====
-async function connectMetaMask() {
+async function connect() {
   if (!window.ethereum) {
     alert("MetaMask not found");
     return;
@@ -36,55 +32,68 @@ async function connectMetaMask() {
   account = await signer.getAddress();
 
   const network = await provider.getNetwork();
-  if (network.chainId !== BigInt(CHAIN_ID)) {
-    alert("Please switch to Sepolia");
+  if (network.chainId !== CHAIN_ID) {
+    alert("Switch to Sepolia");
     return;
   }
 
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-  await updateUI();
+  decimals = await usdt.decimals();
+
+  document.getElementById("account").innerText = account;
+
+  await updateAll();
 }
 
-// ===== UPDATE UI =====
-async function updateUI() {
-  const decimals = await usdt.decimals();
-  const raw = await usdt.balanceOf(account);
-  const balance = Number(ethers.formatUnits(raw, decimals));
+// ===== UPDATE =====
+async function updateAll() {
+  if (!usdt || !account) return;
 
-  document.getElementById("balance").innerText =
-    balance.toFixed(2) + " USDT";
+  const balRaw = await usdt.balanceOf(account);
+  const balance = Number(ethers.formatUnits(balRaw, decimals));
 
+  document.getElementById("balance").innerText = balance.toFixed(2);
   document.getElementById("walletValue").innerText =
-    "$" + (balance * USDT_PRICE).toFixed(2);
+    "$" + balance.toFixed(2);
 
-  document.getElementById("usdtPrice").innerText =
-    "$" + USDT_PRICE.toFixed(2) + " USD";
-
-  document.getElementById("ethPrice").innerText =
-    "$" + ETH_PRICE.toFixed(2) + " USD";
+  // prezzi DIDATTICI STABILI
+  document.getElementById("usdtPrice").innerText = "$1.00 USD";
+  document.getElementById("ethPrice").innerText = "$3000.00 USD";
 }
 
 // ===== SEND =====
 async function sendUSDT() {
-  if (!usdt) {
-    alert("Connect MetaMask first");
-    return;
-  }
+  if (!usdt) return;
 
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
 
-  if (!ethers.isAddress(to)) {
-    alert("Invalid address");
-    return;
+  if (!ethers.isAddress(to)) return alert("Invalid address");
+  if (!amount || Number(amount) <= 0) return alert("Invalid amount");
+
+  try {
+    sendBtn.disabled = true;
+
+    const tx = await usdt.transfer(
+      to,
+      ethers.parseUnits(amount, decimals)
+    );
+
+    await tx.wait();
+    await updateAll();
+
+  } catch (e) {
+    alert("Transaction failed");
+  } finally {
+    sendBtn.disabled = false;
   }
+}
 
-  const decimals = await usdt.decimals();
-  const tx = await usdt.transfer(
-    to,
-    ethers.parseUnits(amount, decimals)
-  );
+// ===== EVENTS =====
+connectBtn.onclick = connect;
+sendBtn.onclick = sendUSDT;
 
-  await tx.wait();
-  await updateUI();
+if (window.ethereum) {
+  window.ethereum.on("accountsChanged", () => location.reload());
+  window.ethereum.on("chainChanged", () => location.reload());
 }

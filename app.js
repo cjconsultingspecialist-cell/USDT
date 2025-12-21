@@ -1,28 +1,22 @@
 console.log("DApp loaded");
 
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
-const AMM_ADDRESS  = "0x9670000000000000000000000000000000000000"; // <-- la tua AMM
-const ETH_DECIMALS = 18;
 const USDT_DECIMALS = 6;
 
-// ABI MINIME
+// PREZZI STABILI STEP 2
+const USDT_PRICE = 1.0;
+const ETH_PRICE  = 3000.0;
+
 const USDT_ABI = [
   "function balanceOf(address) view returns (uint256)",
   "function transfer(address,uint256) returns (bool)"
-];
-
-const AMM_ABI = [
-  "function reserveToken() view returns (uint256)",
-  "function reserveETH() view returns (uint256)"
 ];
 
 let provider;
 let signer;
 let account;
 let usdt;
-let amm;
 
-// 🔹 CONNECT WALLET
 async function connectWallet() {
   if (!window.ethereum) {
     alert("MetaMask not found");
@@ -35,42 +29,30 @@ async function connectWallet() {
   account = await signer.getAddress();
 
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-  amm  = new ethers.Contract(AMM_ADDRESS, AMM_ABI, provider);
 
   document.getElementById("address").innerText =
     account.slice(0, 6) + "..." + account.slice(-4);
 
-  await refreshData();
+  await refreshWallet();
 }
 
-// 🔹 READ AMM + WALLET
-async function refreshData() {
-  const rawBalance = await usdt.balanceOf(account);
-  const balance = Number(ethers.utils.formatUnits(rawBalance, USDT_DECIMALS));
-  document.getElementById("balance").innerText = balance.toFixed(2) + " USDT";
+async function refreshWallet() {
+  const raw = await usdt.balanceOf(account);
+  const balance = Number(ethers.utils.formatUnits(raw, USDT_DECIMALS));
 
-  const reserveUSDT = await amm.reserveToken();
-  const reserveETH  = await amm.reserveETH();
-
-  const usdtReserve = Number(ethers.utils.formatUnits(reserveUSDT, USDT_DECIMALS));
-  const ethReserve  = Number(ethers.utils.formatUnits(reserveETH, ETH_DECIMALS));
-
-  const usdtPrice = ethReserve / usdtReserve;
-  const ethPrice  = usdtReserve / ethReserve;
-
-  const walletValue = balance * usdtPrice;
+  document.getElementById("balance").innerText =
+    balance.toFixed(2) + " USDT";
 
   document.getElementById("walletValue").innerText =
-    "Wallet Value: $" + walletValue.toFixed(2);
+    "Wallet Value: $" + (balance * USDT_PRICE).toFixed(2);
 
   document.getElementById("usdtPrice").innerText =
-    "USDT Price: $" + usdtPrice.toFixed(4) + " USD";
+    "USDT Price: $" + USDT_PRICE.toFixed(2) + " USD";
 
   document.getElementById("ethPrice").innerText =
-    "ETH Price: $" + ethPrice.toFixed(2) + " USD";
+    "ETH Price: $" + ETH_PRICE.toFixed(2) + " USD";
 }
 
-// 🔹 SEND USDT
 async function sendUSDT() {
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
@@ -81,8 +63,7 @@ async function sendUSDT() {
   );
 
   await tx.wait();
-  await refreshData();
+  await refreshWallet();
 }
 
-// 🔹 EVENTS
 document.getElementById("address").onclick = connectWallet;

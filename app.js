@@ -2,14 +2,16 @@ let provider;
 let signer;
 let account;
 let usdt;
+let ethProvider;
 
 const CHAIN_ID = 11155111;
 const CHAIN_HEX = "0xaa36a7";
 
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 const USDT_DECIMALS = 6;
-
 const USDT_LOGO = "https://cryptologos.cc/logos/tether-usdt-logo.png";
+
+const WC_PROJECT_ID = "1537483374ec0250176e950b85934be0";
 
 const USDT_ABI = [
   "function balanceOf(address) view returns (uint256)",
@@ -17,27 +19,35 @@ const USDT_ABI = [
 ];
 
 async function connectWallet() {
-  if (!window.ethereum) {
-    alert("Wallet not detected");
-    return;
+
+  // 1️⃣ DESKTOP (MetaMask / injected)
+  if (window.ethereum) {
+    ethProvider = window.ethereum;
+    await ethProvider.request({ method: "eth_requestAccounts" });
+  }
+  // 2️⃣ MOBILE (WalletConnect v2 — iOS / Android)
+  else {
+    ethProvider = await window.WalletConnectEthereumProvider.init({
+      projectId: WC_PROJECT_ID,
+      chains: [CHAIN_ID],
+      showQrModal: true,
+      rpcMap: {
+        [CHAIN_ID]: "https://rpc.sepolia.org"
+      }
+    });
+    await ethProvider.enable();
   }
 
-  // richiesta account
-  await window.ethereum.request({ method: "eth_requestAccounts" });
-
-  // network check + switch
-  const currentChain = await window.ethereum.request({
-    method: "eth_chainId"
-  });
-
+  // network switch
+  const currentChain = await ethProvider.request({ method: "eth_chainId" });
   if (currentChain !== CHAIN_HEX) {
-    await window.ethereum.request({
+    await ethProvider.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: CHAIN_HEX }]
     });
   }
 
-  provider = new ethers.BrowserProvider(window.ethereum);
+  provider = new ethers.BrowserProvider(ethProvider);
   signer = await provider.getSigner();
   account = await signer.getAddress();
 
@@ -46,19 +56,23 @@ async function connectWallet() {
 
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
 
-  // aggiunta token con logo
-  await window.ethereum.request({
-    method: "wallet_watchAsset",
-    params: {
-      type: "ERC20",
-      options: {
-        address: USDT_ADDRESS,
-        symbol: "USDT",
-        decimals: USDT_DECIMALS,
-        image: USDT_LOGO
-      }
-    }
-  });
+  // aggiunta token + logo
+  if (ethProvider.request) {
+    try {
+      await ethProvider.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: USDT_ADDRESS,
+            symbol: "USDT",
+            decimals: USDT_DECIMALS,
+            image: USDT_LOGO
+          }
+        }
+      });
+    } catch {}
+  }
 
   await updateUI();
 }
@@ -88,6 +102,5 @@ async function sendUSDT() {
   await updateUI();
 }
 
-// ESPOSIZIONE GLOBALE (FONDAMENTALE)
 window.connectWallet = connectWallet;
 window.sendUSDT = sendUSDT;

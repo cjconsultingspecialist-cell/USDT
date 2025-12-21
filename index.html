@@ -2,72 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether USD Official Wallet</title>
+  <title>Tether USD</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <!-- Ethers -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <!-- Style -->
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #f4f7f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 360px;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .header img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      color: #4aa382;
+      margin: 0;
+    }
+
+    .address {
+      border: 2px solid #4aa382;
+      border-radius: 999px;
+      padding: 10px;
+      text-align: center;
+      font-weight: 600;
+      color: #4aa382;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    .card {
+      background: #f1f5f3;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      color: #2f6f5b;
+    }
+
+    .balance {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .meta {
+      color: #555;
+      margin-top: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #4aa382;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+  </style>
 </head>
 
 <body>
   <div class="app">
-
     <div class="header">
-      <img src="USDT.jpg" alt="USDT">
+      <img src="logo.png" alt="USDT" />
       <h1>Tether USD</h1>
     </div>
 
-    <button id="connectBtn" class="btn primary">
-      Connect Wallet
-    </button>
+    <div id="address" class="address">Connect Wallet</div>
 
-    <!-- WALLET INTERNO -->
     <div class="card">
       <h2>Wallet</h2>
-
-      <div class="balance">
-        <span id="balance">0.00</span> USDT
-      </div>
-
-      <div class="usd">
-        Wallet Value: <span id="usdValue">$0.00</span>
-      </div>
-
-      <div class="usd">
-        USDT Price: <span id="usdtPrice">--</span> USD
-      </div>
-
-      <div class="usd">
-        ETH Price: <span id="ethPrice">--</span> USD
-      </div>
+      <div id="balance" class="balance">0.00 USDT</div>
+      <div id="walletValue" class="meta">Wallet Value: $0.00</div>
+      <div id="usdtPrice" class="meta">USDT Price: -- USD</div>
+      <div id="ethPrice" class="meta">ETH Price: -- USD</div>
     </div>
 
-    <!-- TRADE -->
     <div class="card">
-      <h2>Trade</h2>
-
-      <input id="buyEth" placeholder="ETH to spend">
-      <button id="buyBtn" class="btn secondary">
-        Buy USDT
-      </button>
-
-      <input id="sellUsdt" placeholder="USDT to sell">
-      <button id="sellBtn" class="btn secondary">
-        Sell USDT
-      </button>
+      <h2>Send</h2>
+      <input id="to" placeholder="Recipient address" />
+      <input id="amount" placeholder="Amount USDT" />
+      <button onclick="sendUSDT()">Send USDT</button>
     </div>
-
-    <!-- SEND -->
-    <div class="card">
-      <h2>Send USDT</h2>
-
-      <input id="to" placeholder="Recipient address">
-      <input id="amount" placeholder="Amount">
-      <button id="sendBtn" class="btn secondary">
-        Send USDT
-      </button>
-    </div>
-
   </div>
 
   <script src="app.js"></script>

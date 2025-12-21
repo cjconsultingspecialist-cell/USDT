@@ -7,18 +7,19 @@ let contract;
 
 // --- CONFIGURAZIONE Sincronizzata ---
 const TOKEN_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
+// Indirizzo AMM V2 deployato su Sepolia (preso dal tuo messaggio precedente)
 const AMM_ADDRESS = "0x9679Dd5a0f628773Db4Ede7C476ee2cc69140d6D"; 
 const TOKEN_DECIMALS = 6;
-const SEPOLIA_CHAIN_ID = 11155111n;
+const SEPOLIA_CHAIN_ID = 11155111n; // Sepolia
 
-// ABI minimale caricata all'avvio
+// ABI minimale caricata all'avvio dal file usdt.json
 let ABI;
 fetch('usdt.json')
     .then(response => response.json())
     .then(json => { ABI = json; })
     .catch(err => console.error("Errore caricamento usdt.json:", err));
 
-// Funzione principale di connessione
+// Funzione principale di connessione (chiamata automaticamente da body onload nel HTML)
 async function connect() {
   if (!window.ethereum) {
     alert("MetaMask non trovato!");
@@ -70,15 +71,13 @@ async function updatePriceFromAMM() {
     try {
         const priceInEthWei = await ammContract.getPrice();
         
-        // Calcolo: 1 Token costa X ETH. 
-        // Per avere il prezzo in USD: (1 / (priceInEthWei/1e18)) * Prezzo_ETH
         const priceInEth = Number(ethers.formatUnits(priceInEthWei, 18));
         
         const simulatedEthPrice = 2500; // Valore ETH simulato per la lezione
         let tokenPriceUsd = 0;
 
         if (priceInEth > 0) {
-            // Se il contratto restituisce ETH per 1 Token
+            // Calcolo del prezzo del token in USD
             tokenPriceUsd = priceInEth * simulatedEthPrice;
         }
 
@@ -87,7 +86,7 @@ async function updatePriceFromAMM() {
 
     } catch (e) {
         console.error("Errore lettura prezzo AMM:", e);
-        document.getElementById("usdValue").innerText = "Prezzo non disponibile";
+        document.getElementById("usdValue").innerText = "$0.00 USD (Prezzo non disponibile)";
     }
 }
 
@@ -112,7 +111,6 @@ async function send() {
     const value = ethers.parseUnits(amount, TOKEN_DECIMALS);
     const tx = await contract.transfer(to, value);
     
-    // Opzionale: mostra un messaggio di caricamento
     document.getElementById("usdValue").innerText = "Transazione in corso...";
     
     await tx.wait();
@@ -126,7 +124,7 @@ async function send() {
   }
 }
 
-// Funzione Didattica per far apparire il logo nel Wallet degli studenti
+// Funzione Didattica per far apparire il logo nel Wallet degli studenti (chiamata da HTML)
 async function addTokenToWallet() {
     if (!window.ethereum) return;
     try {

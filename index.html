@@ -2,20 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Official Tether USD DApp</title>
+  <title>Tether USD Official Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Ethers v6 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
-
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
   <div class="app">
 
     <div class="header">
-      <img src="USDT.jpg" alt="USDT logo">
+      <img src="USDT.jpg" alt="USDT">
       <h1>Tether USD</h1>
     </div>
 
@@ -28,13 +26,18 @@
       <div class="balance">
         <span id="balance">0.00</span> USDT
       </div>
-      <div class="usd" id="usdValue">$0.00 USD</div>
+      <div class="usd">
+        <span id="usdValue">$0.00</span>
+      </div>
+      <div class="usd">
+        Price: <span id="price">--</span> USD
+      </div>
     </div>
 
     <div class="card">
       <h2>Send USDT</h2>
-      <input id="to" placeholder="Recipient address" />
-      <input id="amount" placeholder="Amount USDT" />
+      <input id="to" placeholder="Recipient address">
+      <input id="amount" placeholder="Amount">
       <button id="sendBtn" class="btn secondary">
         Send USDT
       </button>

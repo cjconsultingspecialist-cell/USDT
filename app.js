@@ -12,88 +12,73 @@ const USDT_ABI = [
 let provider;
 let signer;
 let usdt;
-let activeAddress;
+let activeWallet;
 
 // ===== INIT =====
 window.addEventListener("load", async () => {
   provider = new ethers.JsonRpcProvider(RPC_URL);
 
-  const savedWallet = localStorage.getItem("nativeWallet");
-  if (savedWallet) {
-    signer = new ethers.Wallet(savedWallet, provider);
+  const saved = localStorage.getItem("nativeWallet");
+  if (saved) {
+    signer = new ethers.Wallet(saved, provider);
     activateWallet(signer);
   }
 });
 
-// ===== HELPERS =====
-function short(addr) {
-  return addr.slice(0, 6) + "..." + addr.slice(-4);
-}
-
 // ===== ACTIVATE =====
 async function activateWallet(wallet) {
-  signer = wallet;
-  activeAddress = await signer.getAddress();
-  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+  activeWallet = wallet;
+  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
 
-  document.getElementById("activeAddress").innerText = short(activeAddress);
+  document.getElementById("activeAddress").innerText =
+    wallet.address.slice(0,6)+"..."+wallet.address.slice(-4);
+
   await updateWallet();
 }
 
 // ===== METAMASK =====
 async function connectMetaMask() {
-  if (!window.ethereum) return alert("MetaMask not found");
-
-  const mmProvider = new ethers.BrowserProvider(window.ethereum);
-  await mmProvider.send("eth_requestAccounts", []);
-  const mmSigner = await mmProvider.getSigner();
-
-  activateWallet(mmSigner);
+  const mm = new ethers.BrowserProvider(window.ethereum);
+  await mm.send("eth_requestAccounts", []);
+  activateWallet(await mm.getSigner());
 }
 
-// ===== NATIVE WALLET =====
+// ===== NATIVE =====
 function generateWallet() {
   const wallet = ethers.Wallet.createRandom().connect(provider);
   localStorage.setItem("nativeWallet", wallet.privateKey);
   activateWallet(wallet);
 }
 
-// ===== UPDATE UI =====
+// ===== EXPORT =====
+function exportWallet() {
+  if (!activeWallet?.privateKey) return alert("Only native wallet");
+
+  document.getElementById("pk").value = activeWallet.privateKey;
+  document.getElementById("mnemonic").value =
+    activeWallet.mnemonic?.phrase || "—";
+}
+
+// ===== UPDATE =====
 async function updateWallet() {
-  const decimals = await usdt.decimals();
-  const balRaw = await usdt.balanceOf(activeAddress);
-  const balance = Number(ethers.formatUnits(balRaw, decimals));
+  const d = await usdt.decimals();
+  const bal = await usdt.balanceOf(activeWallet.address);
+  const amount = Number(ethers.formatUnits(bal, d));
 
-  const usdtPrice = 1.0;
-  const ethPrice = 3000.0;
-
-  document.getElementById("walletBalance").innerText = balance.toFixed(2);
-  document.getElementById("usdtPrice").innerText = "$" + usdtPrice.toFixed(2);
-  document.getElementById("ethPrice").innerText = "$" + ethPrice.toFixed(2);
+  document.getElementById("walletBalance").innerText = amount.toFixed(2);
+  document.getElementById("usdtPrice").innerText = "$1.00";
+  document.getElementById("ethPrice").innerText = "$3000.00";
   document.getElementById("walletValue").innerText =
-    "$" + (balance * usdtPrice).toFixed(2);
+    "$" + (amount * 1).toFixed(2);
 }
 
 // ===== SEND =====
 async function sendUSDT() {
   const to = document.getElementById("to").value;
-  const amount = document.getElementById("amount").value;
-  if (!to || !amount) return;
+  const amt = document.getElementById("amount").value;
+  const d = await usdt.decimals();
 
-  const decimals = await usdt.decimals();
-  const tx = await usdt.transfer(
-    to,
-    ethers.parseUnits(amount, decimals)
-  );
-
+  const tx = await usdt.transfer(to, ethers.parseUnits(amt, d));
   await tx.wait();
-  addTx("OUT", amount, tx.hash);
   await updateWallet();
-}
-
-// ===== TX HISTORY =====
-function addTx(type, amount, hash) {
-  const li = document.createElement("li");
-  li.innerText = `${type} ${amount} USDT — ${short(hash)}`;
-  document.getElementById("txHistory").prepend(li);
 }

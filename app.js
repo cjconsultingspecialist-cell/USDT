@@ -13,20 +13,17 @@ let provider;
 let signer = null;
 let wallet = null;
 let usdt = null;
-let mode = null; // metamask | native
+let mode = null;
 
 // ===== INIT =====
 window.addEventListener("load", () => {
   provider = new ethers.JsonRpcProvider(RPC_URL);
-  console.log("DApp ready");
+  loadNativeWallet();
 });
 
 // ===== METAMASK =====
 async function connectMetaMask() {
-  if (!window.ethereum) {
-    alert("MetaMask not installed");
-    return;
-  }
+  if (!window.ethereum) return alert("MetaMask not installed");
 
   const mmProvider = new ethers.BrowserProvider(window.ethereum);
   await mmProvider.send("eth_requestAccounts", []);
@@ -36,17 +33,40 @@ async function connectMetaMask() {
   mode = "metamask";
 
   document.getElementById("activeAddress").innerText = await signer.getAddress();
-  await updateWallet();
+  document.getElementById("privateKey").value = "";
+  updateWallet();
 }
 
 // ===== NATIVE WALLET =====
-async function generateWallet() {
-  wallet = ethers.Wallet.createRandom().connect(provider);
+function createNativeWallet() {
+  let pk = localStorage.getItem("native_pk");
+
+  if (!pk) {
+    wallet = ethers.Wallet.createRandom();
+    localStorage.setItem("native_pk", wallet.privateKey);
+  } else {
+    wallet = new ethers.Wallet(pk);
+  }
+
+  wallet = wallet.connect(provider);
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
   mode = "native";
 
   document.getElementById("activeAddress").innerText = wallet.address;
-  await updateWallet();
+  document.getElementById("privateKey").value = wallet.privateKey;
+
+  updateWallet();
+}
+
+function loadNativeWallet() {
+  if (localStorage.getItem("native_pk")) {
+    createNativeWallet();
+  }
+}
+
+function resetWallet() {
+  localStorage.removeItem("native_pk");
+  location.reload();
 }
 
 // ===== UPDATE =====
@@ -66,18 +86,15 @@ async function updateWallet() {
   const ethPrice = 3000;
 
   document.getElementById("walletBalance").innerText = balance.toFixed(2);
-  document.getElementById("usdtPrice").innerText = "$" + usdtPrice.toFixed(2);
-  document.getElementById("ethPrice").innerText = "$" + ethPrice.toFixed(2);
   document.getElementById("walletValue").innerText =
     "$" + (balance * usdtPrice).toFixed(2);
+  document.getElementById("usdtPrice").innerText = "$" + usdtPrice.toFixed(2);
+  document.getElementById("ethPrice").innerText = "$" + ethPrice.toFixed(2);
 }
 
 // ===== SEND =====
 async function sendUSDT() {
-  if (!usdt) {
-    alert("Connect MetaMask or generate wallet first");
-    return;
-  }
+  if (!usdt) return alert("No wallet connected");
 
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
@@ -89,5 +106,5 @@ async function sendUSDT() {
     ethers.parseUnits(amount, decimals)
   );
   await tx.wait();
-  await updateWallet();
+  updateWallet();
 }

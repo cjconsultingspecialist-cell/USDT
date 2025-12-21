@@ -5,38 +5,37 @@ let signer;
 let account;
 let usdt;
 let amm;
+let ethFeed;
 
 // === CONFIG ===
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 const AMM_ADDRESS  = "0x9679Dd5a0f628773Db4Ede7C476ee2cc69140d6D";
+const ETH_USD_FEED = "0x694AA1769357215DE4FAC081bf1f309aDC325306"; // Chainlink Sepolia
 const USDT_DECIMALS = 6;
 
-// ERC20 ABI
+// ERC20
 const USDT_ABI = [
   "function balanceOf(address) view returns (uint256)",
   "function transfer(address,uint256) returns (bool)"
 ];
 
-// SimpleAMM ABI (solo quello che serve)
+// AMM
 const AMM_ABI = [
   "function reserveToken() view returns (uint256)",
   "function reserveETH() view returns (uint256)"
 ];
 
-// DOM
-const connectBtn = document.getElementById("connectBtn");
-const sendBtn = document.getElementById("sendBtn");
+// Chainlink
+const FEED_ABI = [
+  "function latestRoundData() view returns (uint80,int256,uint256,uint256,uint80)"
+];
 
-connectBtn.onclick = connect;
-sendBtn.onclick = sendUSDT;
+// DOM
+document.getElementById("connectBtn").onclick = connect;
+document.getElementById("sendBtn").onclick = sendUSDT;
 
 // === CONNECT ===
 async function connect() {
-  if (!window.ethereum) {
-    alert("MetaMask not detected");
-    return;
-  }
-
   provider = new ethers.BrowserProvider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
 
@@ -51,50 +50,46 @@ async function connect() {
 
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
   amm  = new ethers.Contract(AMM_ADDRESS, AMM_ABI, provider);
+  ethFeed = new ethers.Contract(ETH_USD_FEED, FEED_ABI, provider);
 
-  connectBtn.innerText =
+  document.getElementById("connectBtn").innerText =
     account.slice(0,6) + "..." + account.slice(-4);
 
   await refreshWallet();
 }
 
-// === WALLET UPDATE ===
+// === WALLET ===
 async function refreshWallet() {
   const raw = await usdt.balanceOf(account);
   const balance = Number(
     ethers.formatUnits(raw, USDT_DECIMALS)
   );
 
-  const price = await getUSDTPrice();
-  const value = balance * price;
+  const ethPrice = await getETHPrice();
+  const usdtPrice = await getUSDTPrice(ethPrice);
+  const valueUSD = balance * usdtPrice;
 
-  document.getElementById("balance").innerText =
-    balance.toFixed(2);
-
-  document.getElementById("price").innerText =
-    price.toFixed(4);
-
-  document.getElementById("usdValue").innerText =
-    `$${value.toFixed(2)} USD`;
+  document.getElementById("balance").innerText = balance.toFixed(2);
+  document.getElementById("price").innerText = usdtPrice.toFixed(4);
+  document.getElementById("ethPrice").innerText = ethPrice.toFixed(2);
+  document.getElementById("usdValue").innerText = `$${valueUSD.toFixed(2)}`;
 }
 
-// === PRICE FROM AMM ===
-async function getUSDTPrice() {
-  const reserveToken = await amm.reserveToken();
-  const reserveETH   = await amm.reserveETH();
+// === PRICES ===
+async function getETHPrice() {
+  const data = await ethFeed.latestRoundData();
+  return Number(data[1]) / 1e8;
+}
 
-  const token = Number(
-    ethers.formatUnits(reserveToken, USDT_DECIMALS)
-  );
-  const eth = Number(
-    ethers.formatEther(reserveETH)
-  );
+async function getUSDTPrice(ethPriceUSD) {
+  const rToken = await amm.reserveToken();
+  const rETH   = await amm.reserveETH();
 
-  // ETH assumed ~2000 USD (didattico)
-  const ethPriceUSD = 2000;
+  const token = Number(ethers.formatUnits(rToken, USDT_DECIMALS));
+  const eth   = Number(ethers.formatEther(rETH));
 
-  const poolValueUSD = eth * ethPriceUSD;
-  return poolValueUSD / token;
+  const poolUSD = eth * ethPriceUSD;
+  return poolUSD / token;
 }
 
 // === SEND ===
@@ -102,34 +97,9 @@ async function sendUSDT() {
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
 
-  if (!ethers.isAddress(to)) {
-    alert("Invalid address");
-    return;
-  }
+  const value = ethers.parseUnits(amount, USDT_DECIMALS);
+  const tx = await usdt.transfer(to, value);
+  await tx.wait();
 
-  if (!amount || Number(amount) <= 0) {
-    alert("Invalid amount");
-    return;
-  }
-
-  try {
-    sendBtn.disabled = true;
-
-    const value = ethers.parseUnits(
-      amount,
-      USDT_DECIMALS
-    );
-
-    const tx = await usdt.transfer(to, value);
-    await tx.wait();
-
-    await refreshWallet();
-    alert("Transfer completed");
-
-  } catch (e) {
-    console.error(e);
-    alert("Transaction failed");
-  } finally {
-    sendBtn.disabled = false;
-  }
+  await refreshWallet();
 }

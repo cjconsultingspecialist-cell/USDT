@@ -1,5 +1,5 @@
 // ===== CONFIG =====
-const RPC_URL = "https://sepolia.infura.io/v3/YOUR_INFURA_KEY";
+const RPC_URL = "https://sepolia.infura.io/v3/1537483374ec0250176e950b85934be0";
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 
 const USDT_ABI = [
@@ -14,7 +14,7 @@ let wallet;
 let usdt;
 
 // ===== INIT =====
-window.addEventListener("load", async () => {
+window.addEventListener("load", () => {
   provider = new ethers.JsonRpcProvider(RPC_URL);
   console.log("DApp loaded");
 });
@@ -25,25 +25,23 @@ async function generateWallet() {
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
 
   document.getElementById("nativeAddress").innerText = wallet.address;
-  document.getElementById("walletAddress").innerText =
-    wallet.address.slice(0, 6) + "..." + wallet.address.slice(-4);
-
   await updateWallet();
 }
 
-// ===== UPDATE =====
+// ===== UPDATE UI =====
 async function updateWallet() {
   if (!wallet) return;
 
   const decimals = await usdt.decimals();
-  const balanceRaw = await usdt.balanceOf(wallet.address);
-  const balance = Number(ethers.formatUnits(balanceRaw, decimals));
+  const raw = await usdt.balanceOf(wallet.address);
+  const balance = Number(ethers.formatUnits(raw, decimals));
 
   document.getElementById("walletBalance").innerText =
     balance.toFixed(2) + " USDT";
 
+  // valori didattici stabili
   const usdtPrice = 1.0;
-  const ethPrice = 3000.0;
+  const ethPrice = 3000;
 
   document.getElementById("usdtPrice").innerText =
     "$" + usdtPrice.toFixed(2) + " USD";
@@ -63,7 +61,6 @@ async function sendUSDT() {
   const amount = document.getElementById("amount").value;
 
   const decimals = await usdt.decimals();
-
   const tx = await usdt.transfer(
     to,
     ethers.parseUnits(amount, decimals)

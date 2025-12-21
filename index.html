@@ -5,24 +5,21 @@
   <title>Tether USD Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Ethers -->
+  <!-- Ethers v6 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
-
-  <!-- WalletConnect -->
-  <script src="https://unpkg.com/@walletconnect/web3-provider/dist/umd/index.min.js"></script>
 
   <style>
     body {
       margin: 0;
-      font-family: Inter, system-ui, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f4f7f6;
       display: flex;
       justify-content: center;
     }
 
     .app {
-      width: 100%;
       max-width: 420px;
+      width: 100%;
       padding: 16px;
     }
 
@@ -39,9 +36,9 @@
     }
 
     .header h1 {
+      margin: 0;
       font-size: 22px;
       color: #26a17b;
-      margin: 0;
     }
 
     .card {
@@ -49,7 +46,7 @@
       border-radius: 16px;
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      box-shadow: 0 8px 20px rgba(0,0,0,.06);
     }
 
     .balance {
@@ -58,8 +55,8 @@
     }
 
     .usd {
-      color: #666;
-      margin-top: 4px;
+      color: #555;
+      margin-top: 6px;
     }
 
     input {
@@ -74,21 +71,16 @@
     button {
       width: 100%;
       padding: 14px;
+      margin-top: 12px;
       border-radius: 999px;
       border: none;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 12px;
     }
 
     .primary {
       background: #26a17b;
-      color: white;
-    }
-
-    .secondary {
-      background: #1e8e6d;
       color: white;
     }
   </style>
@@ -110,18 +102,18 @@
     </div>
 
     <div class="card">
-      <button class="primary" onclick="connectMetaMask()">Connect MetaMask</button>
-      <button class="secondary" onclick="connectWalletConnect()">Mobile Wallet</button>
+      <button id="connectBtn" class="primary">Connect MetaMask</button>
     </div>
 
     <div class="card">
       <input id="to" placeholder="Recipient address" />
       <input id="amount" placeholder="Amount USDT" />
-      <button class="primary" onclick="sendUSDT()">Send USDT</button>
+      <button id="sendBtn" class="primary">Send USDT</button>
     </div>
 
   </div>
 
+  <!-- JS SEMPRE ALLA FINE -->
   <script src="app.js"></script>
 </body>
 </html>

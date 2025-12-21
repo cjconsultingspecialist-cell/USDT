@@ -25,11 +25,13 @@ async function generateWallet() {
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
 
   document.getElementById("nativeAddress").innerText = wallet.address;
+  document.getElementById("walletAddress").innerText =
+    wallet.address.slice(0, 6) + "..." + wallet.address.slice(-4);
 
   await updateWallet();
 }
 
-// ===== UPDATE UI =====
+// ===== UPDATE =====
 async function updateWallet() {
   if (!wallet) return;
 
@@ -40,9 +42,8 @@ async function updateWallet() {
   document.getElementById("walletBalance").innerText =
     balance.toFixed(2) + " USDT";
 
-  // Prezzi DIDATTICI (stabili)
   const usdtPrice = 1.0;
-  const ethPrice = 3000;
+  const ethPrice = 3000.0;
 
   document.getElementById("usdtPrice").innerText =
     "$" + usdtPrice.toFixed(2) + " USD";
@@ -62,6 +63,7 @@ async function sendUSDT() {
   const amount = document.getElementById("amount").value;
 
   const decimals = await usdt.decimals();
+
   const tx = await usdt.transfer(
     to,
     ethers.parseUnits(amount, decimals)

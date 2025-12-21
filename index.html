@@ -2,122 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether USD | Institutional Wallet</title>
+  <title>Official Tether DApp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 
-  <!-- Ethers v6 -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Inter, sans-serif;
-      background: #f4f7f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 420px;
-      background: #fff;
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 20px 40px rgba(0,0,0,.08);
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .header img {
-      width: 42px;
-      height: 42px;
-    }
-
-    .header h1 {
-      font-size: 22px;
-      color: #26a17b;
-      margin: 0;
-      font-weight: 800;
-    }
-
-    .card {
-      background: #f1f5f4;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .balance {
-      font-size: 28px;
-      font-weight: 800;
-    }
-
-    .usd {
-      color: #555;
-      margin-top: 4px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 14px;
-      padding: 14px;
-      border-radius: 999px;
-      border: none;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .primary {
-      background: #26a17b;
-      color: #fff;
-    }
-
-    .secondary {
-      background: #1a7f63;
-      color: #fff;
-    }
-  </style>
+  <!-- ethers v5 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 </head>
 
 <body>
   <div class="app">
-    <div class="header">
-      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" />
-      <h1>Tether USD</h1>
-    </div>
-
-    <button class="primary" onclick="connect()">Connect Wallet</button>
-
     <div class="card">
-      <div class="balance" id="balance">0.00</div>
-      <div class="usd" id="usdValue">$0.00 USD</div>
+      <div class="header">
+        <img src="USDT.jpg" alt="USDT" />
+        <h1>Tether USD</h1>
+      </div>
+
+      <button id="connectBtn" class="btn primary">
+        Connect Wallet
+      </button>
+
+      <div class="card">
+        <h2>Balance</h2>
+        <div class="balance">
+          <span id="tokenBalance">0.00</span> USDT
+        </div>
+        <div class="usd">
+          $<span id="usdBalance">0.00</span> USD
+        </div>
+      </div>
+
+      <input
+        id="toAddress"
+        type="text"
+        placeholder="Recipient address"
+      />
+
+      <input
+        id="amount"
+        type="number"
+        placeholder="Amount USDT"
+      />
+
+      <button id="sendBtn" class="btn secondary">
+        Send USDT
+      </button>
     </div>
-
-    <input id="to" placeholder="Recipient address" />
-    <input id="amount" placeholder="Amount USDT" />
-
-    <button class="secondary" onclick="send()">Send USDT</button>
   </div>
 
   <script src="app.js"></script>

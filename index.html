@@ -2,30 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether USDToken</title>
+  <title>Tether USDToken Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
 
   <style>
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: Inter, Arial, sans-serif;
       background: #f4f7f6;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
     }
 
     .card {
+      width: 390px;
       background: #fff;
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 24px;
-      width: 380px;
-      box-shadow: 0 20px 40px rgba(0,0,0,.08);
+      box-shadow: 0 25px 50px rgba(0,0,0,.1);
     }
 
     .header {
@@ -35,52 +34,36 @@
       margin-bottom: 20px;
     }
 
-    .header img {
-      width: 42px;
-      height: 42px;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 26px;
-      color: #5aa37f;
-    }
+    .header img { width: 42px; }
+    .header h1 { margin: 0; font-size: 26px; color: #5aa37f; }
 
     button {
       width: 100%;
-      border: none;
       padding: 16px;
       border-radius: 999px;
+      border: none;
       font-size: 16px;
       cursor: pointer;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       color: #fff;
     }
 
     .btn-mm { background: #5aa37f; }
     .btn-native { background: #4f78d6; }
+    .btn-danger { background: #c94a4a; }
     .btn-send { background: #5aa37f; margin-top: 12px; }
 
     .box {
       background: #f0f3f1;
       border-radius: 18px;
       padding: 16px;
-      margin-top: 16px;
+      margin-top: 14px;
     }
 
-    .label {
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
+    .label { font-weight: 600; margin-bottom: 6px; }
+    .address { font-size: 14px; word-break: break-all; }
 
-    .address {
-      word-break: break-all;
-      font-size: 14px;
-    }
-
-    .stat {
-      margin: 4px 0;
-    }
+    .stat { margin: 4px 0; }
 
     input {
       width: 100%;
@@ -90,6 +73,16 @@
       margin-top: 10px;
       font-size: 15px;
     }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      font-size: 13px;
+      resize: none;
+    }
   </style>
 </head>
 
@@ -97,12 +90,13 @@
   <div class="card">
 
     <div class="header">
-      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" />
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png">
       <h1>Tether USDToken</h1>
     </div>
 
     <button class="btn-mm" onclick="connectMetaMask()">Connect MetaMask</button>
-    <button class="btn-native" onclick="generateWallet()">Generate Native Wallet</button>
+    <button class="btn-native" onclick="createNativeWallet()">Create / Load Native Wallet</button>
+    <button class="btn-danger" onclick="resetWallet()">Reset Native Wallet</button>
 
     <div class="box">
       <div class="label">Active Address</div>
@@ -117,8 +111,13 @@
     </div>
 
     <div class="box">
-      <input id="to" placeholder="Recipient address" />
-      <input id="amount" placeholder="Amount USDT" />
+      <div class="label">Private Key (native wallet)</div>
+      <textarea id="privateKey" rows="2" readonly></textarea>
+    </div>
+
+    <div class="box">
+      <input id="to" placeholder="Recipient address">
+      <input id="amount" placeholder="Amount USDT">
       <button class="btn-send" onclick="sendUSDT()">Send USDT</button>
     </div>
 

@@ -4,124 +4,100 @@
   <meta charset="UTF-8" />
   <title>Tether USDToken</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f3f7f4;
       margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #f4f7f6;
       display: flex;
       justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-
     .app {
-      max-width: 420px;
-      width: 100%;
-      padding: 20px;
+      width: 380px;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.08);
     }
-
     .header {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 20px;
     }
-
-    .logo {
-      width: 42px;
-      height: 42px;
-      background: #26a17b;
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
+    .header img {
+      width: 40px;
+      height: 40px;
     }
-
-    h1 { margin: 0; color: #2b7a5f; }
-
+    .header h1 {
+      font-size: 24px;
+      margin: 0;
+      color: #4a9f7a;
+    }
     button {
       width: 100%;
-      padding: 14px;
-      border-radius: 30px;
       border: none;
-      color: white;
-      font-size: 16px;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-
-    .mm { background: #4f8f78; }
-    .native { background: #4a74d1; }
-    .export { background: #d17b4a; }
-    .send { background: #4f8f78; }
-
-    .card {
-      background: white;
-      border-radius: 18px;
+      border-radius: 999px;
       padding: 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      color: #fff;
     }
-
-    .value { font-size: 26px; font-weight: bold; }
-
-    input, textarea {
+    .btn-mm { background: #5da37d; }
+    .btn-native { background: #4f78d1; }
+    .card {
+      background: #f1f4f2;
+      border-radius: 20px;
+      padding: 16px;
+      margin-top: 16px;
+      word-break: break-all;
+    }
+    input {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       border-radius: 14px;
       border: 1px solid #ccc;
-      margin-bottom: 10px;
-      font-size: 14px;
+      margin-top: 12px;
+      font-size: 15px;
     }
-
-    textarea { resize: none; height: 60px; }
+    .send { background: #5da37d; margin-top: 16px; }
   </style>
 </head>
 
 <body>
-<div class="app">
+  <div class="app">
+    <div class="header">
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" />
+      <h1>Tether USDToken</h1>
+    </div>
 
-  <div class="header">
-    <div class="logo">T</div>
-    <h1>Tether USDToken</h1>
-  </div>
+    <button class="btn-mm" onclick="connectMetaMask()">Connect MetaMask</button>
+    <button class="btn-native" onclick="generateNativeWallet()">Generate Native Wallet</button>
 
-  <button class="mm" onclick="connectMetaMask()">Connect MetaMask</button>
-  <button class="native" onclick="generateWallet()">Generate Native Wallet</button>
-  <button class="export" onclick="exportWallet()">Export Wallet</button>
+    <div class="card">
+      <strong>Active Address:</strong>
+      <div id="activeAddress">—</div>
+    </div>
 
-  <div class="card">
-    <b>Active Address</b><br>
-    <span id="activeAddress">—</span>
-  </div>
+    <div class="card">
+      <div><strong>Wallet Value:</strong> <span id="walletValue">$0.00</span></div>
+      <div>USDT Balance: <span id="usdtBalance">0.00</span></div>
+      <div>USDT Price: <span id="usdtPrice">$1.00 USD</span></div>
+      <div>ETH Price: <span id="ethPrice">$3000.00 USD</span></div>
+    </div>
 
-  <div class="card">
-    <div class="value" id="walletValue">$0.00</div>
-    USDT Balance: <span id="walletBalance">0.00</span><br>
-    USDT Price: <span id="usdtPrice">--</span><br>
-    ETH Price: <span id="ethPrice">--</span>
-  </div>
+    <input id="to" placeholder="Recipient address" />
+    <input id="amount" placeholder="Amount USDT" />
 
-  <div class="card">
-    <input id="to" placeholder="Recipient address">
-    <input id="amount" placeholder="Amount USDT">
     <button class="send" onclick="sendUSDT()">Send USDT</button>
   </div>
 
-  <div class="card">
-    <b>Private Key</b>
-    <textarea id="pk" readonly></textarea>
-
-    <b>Mnemonic (Seed)</b>
-    <textarea id="mnemonic" readonly></textarea>
-  </div>
-
-</div>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

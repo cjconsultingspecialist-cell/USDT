@@ -1,4 +1,4 @@
-console.log("Wallet loaded");
+console.log("Internal Wallet Loaded");
 
 let provider;
 let signer;
@@ -61,7 +61,7 @@ async function connect() {
   await refreshWallet();
 }
 
-// === WALLET ===
+// === WALLET LOGIC ===
 async function refreshWallet() {
   const raw = await usdt.balanceOf(account);
   const balance = Number(
@@ -73,12 +73,12 @@ async function refreshWallet() {
   const valueUSD = balance * usdtPrice;
 
   document.getElementById("balance").innerText = balance.toFixed(2);
-  document.getElementById("price").innerText = usdtPrice.toFixed(4);
+  document.getElementById("usdtPrice").innerText = usdtPrice.toFixed(4);
   document.getElementById("ethPrice").innerText = ethPrice.toFixed(2);
   document.getElementById("usdValue").innerText = `$${valueUSD.toFixed(2)}`;
 }
 
-// === PRICES ===
+// === PRICE FEEDS ===
 async function getETHPrice() {
   const data = await ethFeed.latestRoundData();
   return Number(data[1]) / 1e8;
@@ -97,9 +97,11 @@ async function getUSDTPrice(ethPriceUSD) {
 // === BUY ===
 async function buyUSDT() {
   const ethAmount = document.getElementById("buyEth").value;
+
   const tx = await amm.buyTokens({
     value: ethers.parseEther(ethAmount)
   });
+
   await tx.wait();
   await refreshWallet();
 }

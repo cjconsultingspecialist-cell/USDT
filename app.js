@@ -1,6 +1,5 @@
 // ===== CONFIG =====
-const RPC_URL = "https://sepolia.infura.io/v3/1537483374ec0250176e950b85934be0";
-
+const RPC_URL = "https://sepolia.infura.io/v3/YOUR_INFURA_KEY";
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 
 const USDT_ABI = [
@@ -12,86 +11,74 @@ const USDT_ABI = [
 // ===== GLOBAL =====
 let provider;
 let signer;
-let wallet;
 let usdt;
+let activeAddress;
 
 // ===== INIT =====
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   provider = new ethers.JsonRpcProvider(RPC_URL);
+
+  const savedWallet = localStorage.getItem("nativeWallet");
+  if (savedWallet) {
+    signer = new ethers.Wallet(savedWallet, provider);
+    activateWallet(signer);
+  }
 });
+
+// ===== HELPERS =====
+function short(addr) {
+  return addr.slice(0, 6) + "..." + addr.slice(-4);
+}
+
+// ===== ACTIVATE =====
+async function activateWallet(wallet) {
+  signer = wallet;
+  activeAddress = await signer.getAddress();
+  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+
+  document.getElementById("activeAddress").innerText = short(activeAddress);
+  await updateWallet();
+}
 
 // ===== METAMASK =====
 async function connectMetaMask() {
   if (!window.ethereum) return alert("MetaMask not found");
 
   const mmProvider = new ethers.BrowserProvider(window.ethereum);
-  signer = await mmProvider.getSigner();
+  await mmProvider.send("eth_requestAccounts", []);
+  const mmSigner = await mmProvider.getSigner();
 
-  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-
-  document.getElementById("activeAddress").innerText = signer.address;
-  document.getElementById("privateKey").innerText = "MetaMask wallet";
-
-  updateWallet(signer.address);
+  activateWallet(mmSigner);
 }
 
 // ===== NATIVE WALLET =====
-async function generateWallet() {
-  wallet = ethers.Wallet.createRandom().connect(provider);
-  signer = wallet;
-
-  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
-
-  document.getElementById("activeAddress").innerText = wallet.address;
-  document.getElementById("privateKey").innerText = wallet.privateKey;
-
-  updateWallet(wallet.address);
+function generateWallet() {
+  const wallet = ethers.Wallet.createRandom().connect(provider);
+  localStorage.setItem("nativeWallet", wallet.privateKey);
+  activateWallet(wallet);
 }
 
-// ===== IMPORT WALLET =====
-async function importWallet() {
-  const pk = document.getElementById("importKey").value.trim();
-  if (!pk) return;
-
-  wallet = new ethers.Wallet(pk, provider);
-  signer = wallet;
-
-  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
-
-  document.getElementById("activeAddress").innerText = wallet.address;
-  document.getElementById("privateKey").innerText = wallet.privateKey;
-
-  updateWallet(wallet.address);
-}
-
-// ===== UI =====
-function togglePK() {
-  const el = document.getElementById("privateKey");
-  el.style.display = el.style.display === "none" ? "block" : "none";
-}
-
-// ===== UPDATE =====
-async function updateWallet(address) {
+// ===== UPDATE UI =====
+async function updateWallet() {
   const decimals = await usdt.decimals();
-  const raw = await usdt.balanceOf(address);
-  const balance = Number(ethers.formatUnits(raw, decimals));
+  const balRaw = await usdt.balanceOf(activeAddress);
+  const balance = Number(ethers.formatUnits(balRaw, decimals));
 
   const usdtPrice = 1.0;
-  const ethPrice = 3000;
+  const ethPrice = 3000.0;
 
   document.getElementById("walletBalance").innerText = balance.toFixed(2);
-  document.getElementById("usdtPrice").innerText = "$1.00 USD";
-  document.getElementById("ethPrice").innerText = "$3000.00 USD";
+  document.getElementById("usdtPrice").innerText = "$" + usdtPrice.toFixed(2);
+  document.getElementById("ethPrice").innerText = "$" + ethPrice.toFixed(2);
   document.getElementById("walletValue").innerText =
     "$" + (balance * usdtPrice).toFixed(2);
 }
 
 // ===== SEND =====
 async function sendUSDT() {
-  if (!signer) return alert("No wallet");
-
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
+  if (!to || !amount) return;
 
   const decimals = await usdt.decimals();
   const tx = await usdt.transfer(
@@ -100,5 +87,13 @@ async function sendUSDT() {
   );
 
   await tx.wait();
-  updateWallet(signer.address);
+  addTx("OUT", amount, tx.hash);
+  await updateWallet();
+}
+
+// ===== TX HISTORY =====
+function addTx(type, amount, hash) {
+  const li = document.createElement("li");
+  li.innerText = `${type} ${amount} USDT — ${short(hash)}`;
+  document.getElementById("txHistory").prepend(li);
 }

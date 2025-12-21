@@ -1,7 +1,6 @@
 // ===== CONFIG =====
 const RPC_URL = "https://sepolia.infura.io/v3/YOUR_INFURA_KEY";
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
-
 const USDT_ABI = [
   "function balanceOf(address) view returns (uint256)",
   "function transfer(address,uint256) returns (bool)",
@@ -11,74 +10,62 @@ const USDT_ABI = [
 // ===== GLOBAL =====
 let provider;
 let signer;
+let wallet;
 let usdt;
-let activeWallet;
 
 // ===== INIT =====
-window.addEventListener("load", async () => {
+window.addEventListener("load", () => {
   provider = new ethers.JsonRpcProvider(RPC_URL);
-
-  const saved = localStorage.getItem("nativeWallet");
-  if (saved) {
-    signer = new ethers.Wallet(saved, provider);
-    activateWallet(signer);
-  }
 });
 
-// ===== ACTIVATE =====
-async function activateWallet(wallet) {
-  activeWallet = wallet;
-  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
+// ===== SHARED UPDATE =====
+async function refreshUI(address) {
+  const readUSDT = new ethers.Contract(USDT_ADDRESS, USDT_ABI, provider);
+  const decimals = await readUSDT.decimals();
+  const raw = await readUSDT.balanceOf(address);
+  const balance = Number(ethers.formatUnits(raw, decimals));
 
-  document.getElementById("activeAddress").innerText =
-    wallet.address.slice(0,6)+"..."+wallet.address.slice(-4);
-
-  await updateWallet();
+  document.getElementById("activeAddress").innerText = address;
+  document.getElementById("usdtBalance").innerText = balance.toFixed(2);
+  document.getElementById("usdtPrice").innerText = "$1.00 USD";
+  document.getElementById("ethPrice").innerText = "$3000.00 USD";
+  document.getElementById("walletValue").innerText = "$" + (balance * 1).toFixed(2);
 }
 
 // ===== METAMASK =====
 async function connectMetaMask() {
-  const mm = new ethers.BrowserProvider(window.ethereum);
-  await mm.send("eth_requestAccounts", []);
-  activateWallet(await mm.getSigner());
+  if (!window.ethereum) return alert("MetaMask not found");
+
+  const mmProvider = new ethers.BrowserProvider(window.ethereum);
+  await mmProvider.send("eth_requestAccounts", []);
+  signer = await mmProvider.getSigner();
+
+  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+  await refreshUI(await signer.getAddress());
 }
 
-// ===== NATIVE =====
-function generateWallet() {
-  const wallet = ethers.Wallet.createRandom().connect(provider);
-  localStorage.setItem("nativeWallet", wallet.privateKey);
-  activateWallet(wallet);
-}
+// ===== NATIVE WALLET =====
+async function generateNativeWallet() {
+  wallet = ethers.Wallet.createRandom().connect(provider);
+  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, wallet);
 
-// ===== EXPORT =====
-function exportWallet() {
-  if (!activeWallet?.privateKey) return alert("Only native wallet");
-
-  document.getElementById("pk").value = activeWallet.privateKey;
-  document.getElementById("mnemonic").value =
-    activeWallet.mnemonic?.phrase || "—";
-}
-
-// ===== UPDATE =====
-async function updateWallet() {
-  const d = await usdt.decimals();
-  const bal = await usdt.balanceOf(activeWallet.address);
-  const amount = Number(ethers.formatUnits(bal, d));
-
-  document.getElementById("walletBalance").innerText = amount.toFixed(2);
-  document.getElementById("usdtPrice").innerText = "$1.00";
-  document.getElementById("ethPrice").innerText = "$3000.00";
-  document.getElementById("walletValue").innerText =
-    "$" + (amount * 1).toFixed(2);
+  await refreshUI(wallet.address);
 }
 
 // ===== SEND =====
 async function sendUSDT() {
-  const to = document.getElementById("to").value;
-  const amt = document.getElementById("amount").value;
-  const d = await usdt.decimals();
+  if (!usdt) return alert("No wallet active");
 
-  const tx = await usdt.transfer(to, ethers.parseUnits(amt, d));
+  const to = document.getElementById("to").value;
+  const amount = document.getElementById("amount").value;
+  const decimals = await usdt.decimals();
+
+  const tx = await usdt.transfer(
+    to,
+    ethers.parseUnits(amount, decimals)
+  );
   await tx.wait();
-  await updateWallet();
+
+  const addr = signer ? await signer.getAddress() : wallet.address;
+  await refreshUI(addr);
 }

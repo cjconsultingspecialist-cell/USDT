@@ -2,100 +2,124 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether USDToken</title>
+  <title>Tether USD Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Ethers -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+
+  <!-- WalletConnect -->
+  <script src="https://unpkg.com/@walletconnect/web3-provider/dist/umd/index.min.js"></script>
 
   <style>
     body {
       margin: 0;
-      font-family: Inter, Arial, sans-serif;
+      font-family: Inter, system-ui, sans-serif;
       background: #f4f7f6;
       display: flex;
       justify-content: center;
-      align-items: center;
-      min-height: 100vh;
     }
+
     .app {
-      width: 380px;
-      background: #ffffff;
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 20px 40px rgba(0,0,0,.08);
+      width: 100%;
+      max-width: 420px;
+      padding: 16px;
     }
+
     .header {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 20px;
     }
+
     .header img {
       width: 40px;
       height: 40px;
     }
+
     .header h1 {
-      font-size: 24px;
+      font-size: 22px;
+      color: #26a17b;
       margin: 0;
-      color: #4a9f7a;
     }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    }
+
+    .balance {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .usd {
+      color: #666;
+      margin-top: 4px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+
     button {
       width: 100%;
-      border: none;
+      padding: 14px;
       border-radius: 999px;
-      padding: 16px;
+      border: none;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       margin-top: 12px;
-      color: #fff;
     }
-    .btn-mm { background: #5da37d; }
-    .btn-native { background: #4f78d1; }
-    .card {
-      background: #f1f4f2;
-      border-radius: 20px;
-      padding: 16px;
-      margin-top: 16px;
-      word-break: break-all;
+
+    .primary {
+      background: #26a17b;
+      color: white;
     }
-    input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid #ccc;
-      margin-top: 12px;
-      font-size: 15px;
+
+    .secondary {
+      background: #1e8e6d;
+      color: white;
     }
-    .send { background: #5da37d; margin-top: 16px; }
   </style>
 </head>
 
 <body>
   <div class="app">
+
     <div class="header">
       <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" />
-      <h1>Tether USDToken</h1>
-    </div>
-
-    <button class="btn-mm" onclick="connectMetaMask()">Connect MetaMask</button>
-    <button class="btn-native" onclick="generateNativeWallet()">Generate Native Wallet</button>
-
-    <div class="card">
-      <strong>Active Address:</strong>
-      <div id="activeAddress">—</div>
+      <h1>Tether USD Wallet</h1>
     </div>
 
     <div class="card">
-      <div><strong>Wallet Value:</strong> <span id="walletValue">$0.00</span></div>
-      <div>USDT Balance: <span id="usdtBalance">0.00</span></div>
-      <div>USDT Price: <span id="usdtPrice">$1.00 USD</span></div>
-      <div>ETH Price: <span id="ethPrice">$3000.00 USD</span></div>
+      <div class="balance" id="balance">0.00 USDT</div>
+      <div class="usd" id="walletValue">$0.00</div>
+      <div class="usd">USDT Price: <span id="usdtPrice">--</span></div>
+      <div class="usd">ETH Price: <span id="ethPrice">--</span></div>
     </div>
 
-    <input id="to" placeholder="Recipient address" />
-    <input id="amount" placeholder="Amount USDT" />
+    <div class="card">
+      <button class="primary" onclick="connectMetaMask()">Connect MetaMask</button>
+      <button class="secondary" onclick="connectWalletConnect()">Mobile Wallet</button>
+    </div>
 
-    <button class="send" onclick="sendUSDT()">Send USDT</button>
+    <div class="card">
+      <input id="to" placeholder="Recipient address" />
+      <input id="amount" placeholder="Amount USDT" />
+      <button class="primary" onclick="sendUSDT()">Send USDT</button>
+    </div>
+
   </div>
 
   <script src="app.js"></script>

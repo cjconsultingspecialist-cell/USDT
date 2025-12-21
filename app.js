@@ -8,8 +8,8 @@ const USDT_ABI = [
   "function decimals() view returns (uint8)"
 ];
 
-const USDT_PRICE = 1.0;       // didattico
-const ETH_PRICE = 3000.0;    // didattico
+const USDT_PRICE = 1.0;    // didattico
+const ETH_PRICE = 3000.0; // didattico
 
 // ===== GLOBAL =====
 let provider;
@@ -17,7 +17,13 @@ let signer;
 let account;
 let usdt;
 
-// ===== METAMASK =====
+// ===== DOM READY =====
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("connectBtn").addEventListener("click", connectMetaMask);
+  document.getElementById("sendBtn").addEventListener("click", sendUSDT);
+});
+
+// ===== CONNECT =====
 async function connectMetaMask() {
   if (!window.ethereum) {
     alert("MetaMask not found");
@@ -31,27 +37,9 @@ async function connectMetaMask() {
 
   const network = await provider.getNetwork();
   if (network.chainId !== BigInt(CHAIN_ID)) {
-    alert("Switch to Sepolia");
+    alert("Please switch to Sepolia");
     return;
   }
-
-  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-  await updateUI();
-}
-
-// ===== WALLETCONNECT (MOBILE) =====
-async function connectWalletConnect() {
-  const wcProvider = new WalletConnectProvider.default({
-    rpc: {
-      11155111: "https://rpc.sepolia.org"
-    }
-  });
-
-  await wcProvider.enable();
-
-  provider = new ethers.BrowserProvider(wcProvider);
-  signer = await provider.getSigner();
-  account = await signer.getAddress();
 
   usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
   await updateUI();
@@ -78,7 +66,10 @@ async function updateUI() {
 
 // ===== SEND =====
 async function sendUSDT() {
-  if (!usdt) return alert("Connect wallet first");
+  if (!usdt) {
+    alert("Connect MetaMask first");
+    return;
+  }
 
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
@@ -97,8 +88,3 @@ async function sendUSDT() {
   await tx.wait();
   await updateUI();
 }
-
-// ===== FIX TASTI (OBBLIGATORIO) =====
-window.connectMetaMask = connectMetaMask;
-window.connectWalletConnect = connectWalletConnect;
-window.sendUSDT = sendUSDT;

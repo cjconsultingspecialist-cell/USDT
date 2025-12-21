@@ -12,19 +12,14 @@
       font-family: Arial, sans-serif;
       background: #f3f7f4;
       margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
     }
 
     .app {
-      width: 100%;
       max-width: 420px;
+      width: 100%;
       padding: 20px;
-    }
-
-    .header {
-      display: flex understanding the final code requirement
     }
 
     .header {
@@ -39,117 +34,94 @@
       height: 42px;
       background: #26a17b;
       color: white;
-      font-weight: bold;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-weight: bold;
     }
 
-    h1 {
-      font-size: 22px;
-      margin: 0;
-      color: #2b7a5f;
-    }
+    h1 { margin: 0; color: #2b7a5f; }
 
     button {
       width: 100%;
       padding: 14px;
       border-radius: 30px;
       border: none;
-      font-size: 16px;
-      cursor: pointer;
-      margin-bottom: 12px;
       color: white;
+      font-size: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
     }
 
-    .btn-mm { background: #4f8f78; }
-    .btn-native { background: #4a74d1; }
-    .btn-send { background: #4f8f78; }
+    .mm { background: #4f8f78; }
+    .native { background: #4a74d1; }
+    .export { background: #d17b4a; }
+    .send { background: #4f8f78; }
 
     .card {
       background: white;
       border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
 
-    .label {
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
+    .value { font-size: 26px; font-weight: bold; }
 
-    .address {
-      word-break: break-all;
-      font-size: 14px;
-      color: #333;
-    }
-
-    .value {
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    input {
+    input, textarea {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       border-radius: 14px;
       border: 1px solid #ccc;
       margin-bottom: 10px;
-      font-size: 15px;
-    }
-
-    ul {
-      padding-left: 18px;
-      margin: 0;
-    }
-
-    li {
       font-size: 14px;
-      margin-bottom: 6px;
     }
+
+    textarea { resize: none; height: 60px; }
   </style>
 </head>
 
 <body>
-  <div class="app">
+<div class="app">
 
-    <div class="header">
-      <div class="logo">T</div>
-      <h1>Tether USDToken</h1>
-    </div>
-
-    <button class="btn-mm" onclick="connectMetaMask()">Connect MetaMask</button>
-    <button class="btn-native" onclick="generateWallet()">Generate Native Wallet</button>
-
-    <div class="card">
-      <div class="label">Active Address</div>
-      <div id="activeAddress" class="address">—</div>
-    </div>
-
-    <div class="card">
-      <div class="value" id="walletValue">$0.00</div>
-      <div>USDT Balance: <span id="walletBalance">0.00</span></div>
-      <div>USDT Price: <span id="usdtPrice">--</span></div>
-      <div>ETH Price: <span id="ethPrice">--</span></div>
-    </div>
-
-    <div class="card">
-      <input id="to" placeholder="Recipient address" />
-      <input id="amount" placeholder="Amount USDT" />
-      <button class="btn-send" onclick="sendUSDT()">Send USDT</button>
-    </div>
-
-    <div class="card">
-      <div class="label">Transaction History</div>
-      <ul id="txHistory"></ul>
-    </div>
-
+  <div class="header">
+    <div class="logo">T</div>
+    <h1>Tether USDToken</h1>
   </div>
 
-  <script src="app.js"></script>
+  <button class="mm" onclick="connectMetaMask()">Connect MetaMask</button>
+  <button class="native" onclick="generateWallet()">Generate Native Wallet</button>
+  <button class="export" onclick="exportWallet()">Export Wallet</button>
+
+  <div class="card">
+    <b>Active Address</b><br>
+    <span id="activeAddress">—</span>
+  </div>
+
+  <div class="card">
+    <div class="value" id="walletValue">$0.00</div>
+    USDT Balance: <span id="walletBalance">0.00</span><br>
+    USDT Price: <span id="usdtPrice">--</span><br>
+    ETH Price: <span id="ethPrice">--</span>
+  </div>
+
+  <div class="card">
+    <input id="to" placeholder="Recipient address">
+    <input id="amount" placeholder="Amount USDT">
+    <button class="send" onclick="sendUSDT()">Send USDT</button>
+  </div>
+
+  <div class="card">
+    <b>Private Key</b>
+    <textarea id="pk" readonly></textarea>
+
+    <b>Mnemonic (Seed)</b>
+    <textarea id="mnemonic" readonly></textarea>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>

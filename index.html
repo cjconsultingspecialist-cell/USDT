@@ -5,10 +5,8 @@
   <title>Tether USD</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Ethers -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-  <!-- Style -->
   <style>
     body {
       margin: 0;
@@ -64,11 +62,6 @@
       margin-bottom: 20px;
     }
 
-    .card h2 {
-      margin: 0 0 10px;
-      color: #2f6f5b;
-    }
-
     .balance {
       font-size: 32px;
       font-weight: 700;
@@ -113,15 +106,13 @@
     <div id="address" class="address">Connect Wallet</div>
 
     <div class="card">
-      <h2>Wallet</h2>
       <div id="balance" class="balance">0.00 USDT</div>
       <div id="walletValue" class="meta">Wallet Value: $0.00</div>
-      <div id="usdtPrice" class="meta">USDT Price: -- USD</div>
-      <div id="ethPrice" class="meta">ETH Price: -- USD</div>
+      <div id="usdtPrice" class="meta">USDT Price: $1.00 USD</div>
+      <div id="ethPrice" class="meta">ETH Price: $3000.00 USD</div>
     </div>
 
     <div class="card">
-      <h2>Send</h2>
       <input id="to" placeholder="Recipient address" />
       <input id="amount" placeholder="Amount USDT" />
       <button onclick="sendUSDT()">Send USDT</button>

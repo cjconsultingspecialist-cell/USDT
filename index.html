@@ -21,22 +21,28 @@
       Connect Wallet
     </button>
 
+    <!-- WALLET INTERNO -->
     <div class="card">
       <h2>Wallet</h2>
+
       <div class="balance">
         <span id="balance">0.00</span> USDT
       </div>
+
       <div class="usd">
-        <span id="usdValue">$0.00</span>
+        Wallet Value: <span id="usdValue">$0.00</span>
       </div>
+
       <div class="usd">
-        USDT Price: <span id="price">--</span> USD
+        USDT Price: <span id="usdtPrice">--</span> USD
       </div>
+
       <div class="usd">
         ETH Price: <span id="ethPrice">--</span> USD
       </div>
     </div>
 
+    <!-- TRADE -->
     <div class="card">
       <h2>Trade</h2>
 
@@ -51,8 +57,10 @@
       </button>
     </div>
 
+    <!-- SEND -->
     <div class="card">
       <h2>Send USDT</h2>
+
       <input id="to" placeholder="Recipient address">
       <input id="amount" placeholder="Amount">
       <button id="sendBtn" class="btn secondary">

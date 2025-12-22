@@ -1,8 +1,3 @@
-// app.js – Security Wallet Pro v3 Universale e Professionale
-
-// Assicurati che Ethers.js v6 sia caricato nell'HTML prima di questo script
-// (<script src="cdn.ethers.io"></script>)
-
 let provider;
 let signer;
 let account;
@@ -18,36 +13,17 @@ const USDT_ABI = [
   "function transfer(address,uint256) returns (bool)"
 ];
 
-// 1. Funzione per saltare dal browser normale all'App Wallet (Deep Linking)
-function openInWallet() {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    const dappUrl = window.location.href;
-
-    // Controlla per iOS (iPhone/iPad) - Link corretto
-    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        window.location.href = `metamask.app.link{dappUrl.replace("https://", "")}`;
-    } 
-    // Controlla per Android - Link corretto
-    else if (/android/i.test(userAgent)) {
-        window.location.href = `intent://${dappUrl.replace("https://", "")}#Intent;package=com.metamask.android;scheme=https;end`;
-    }
-    // Browser desktop senza estensione
-    else if (typeof window.ethereum === 'undefined') {
-        alert("Installa MetaMask o apri questa pagina dal browser interno del tuo Wallet mobile.");
-    }
-}
-
-// 2. Connessione Universale e Switch Rete Automatico
+// 1. Connessione Standard (PC + MetaMask Extension)
 async function connectWallet() {
   if (typeof window.ethereum === 'undefined') {
-    alert("Per favore, apri questa pagina dal browser interno del tuo Wallet.");
+    alert("Per favore, installa l'estensione MetaMask per connetterti.");
     return;
   }
 
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
     const accs = await provider.send("eth_requestAccounts", []);
-    account = accs[0];
+    account = accs[0]; // Prende il primo account
 
     const network = await provider.getNetwork();
     if (network.chainId !== SEPOLIA_CHAIN_ID_DEC) {
@@ -69,7 +45,6 @@ async function connectWallet() {
     document.getElementById("wallet").innerText = account.slice(0, 6) + "..." + account.slice(-4);
     document.getElementById("status").innerText = "● Connesso (Sepolia)";
     document.getElementById("status").style.color = "#26a17b";
-    document.getElementById("btnMobileOpen").style.display = "none"; 
 
     usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
     updateUI();
@@ -80,7 +55,7 @@ async function connectWallet() {
   }
 }
 
-// 3. Funzione per aggiungere il LOGO finto Tether al Wallet (Link immagine corretto)
+// 2. Funzione per aggiungere il LOGO finto Tether al Wallet
 async function addTokenToWallet() {
     if (!window.ethereum) return;
     try {
@@ -92,7 +67,7 @@ async function addTokenToWallet() {
                     address: USDT_ADDRESS,
                     symbol: 'USDT',
                     decimals: USDT_DECIMALS,
-                    image: 'cryptologos.cc', // Link immagine completo
+                    image: 'cryptologos.cc',
                 },
             },
         });
@@ -101,7 +76,7 @@ async function addTokenToWallet() {
     }
 }
 
-// 4. Aggiornamento Saldo
+// 3. Aggiornamento Saldo
 async function updateUI() {
   if (!usdt || !account) return;
   const raw = await usdt.balanceOf(account);
@@ -111,7 +86,7 @@ async function updateUI() {
   document.getElementById("usdValue").innerText = "$" + balance.toLocaleString() + " USD"; 
 }
 
-// 5. Invio Token
+// 4. Invio Token
 async function sendUSDT() {
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
@@ -133,9 +108,8 @@ async function sendUSDT() {
   }
 }
 
-// Nascondi il pulsante deep-link se siamo già in un wallet browser
-window.addEventListener('load', () => {
-    if (window.ethereum) {
-        document.getElementById("btnMobileOpen").style.display = "none";
-    }
-});
+// Listener per la gestione di cambi account/rete automatici (migliore UX)
+if (window.ethereum) {
+    window.ethereum.on("accountsChanged", () => location.reload());
+    window.ethereum.on("chainChanged", () => location.reload());
+}

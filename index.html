@@ -2,47 +2,39 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<title>Tether Wallet EDU</title>
+<title>Tether Wallet</title> <!-- Titolo pulito -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script src="cdn.jsdelivr.net"></script>
-<!-- Collega il tuo file CSS esterno -->
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css"> <!-- Assicurati che il tuo file CSS si chiami style.css -->
 </head>
 <body>
 <div class="app">
 
-  <!-- Pulsante per aprire in app mobile (utilizza lo stile del bottone standard) -->
-  <button id="btnMobileOpen" style="margin-bottom: 20px;">📱 Apri nel Wallet App</button>
+  <button id="btnMobileOpen" style="margin-bottom: 20px;">📱 Apri in Wallet App</button>
 
   <div class="header">
     <img src="cryptologos.cc" alt="USDT Logo">
-    <h1>Tether Wallet EDU</h1>
-    <!-- Aggiunto un div per lo stato con ID -->
+    <h1>Tether Wallet</h1> <!-- Titolo pulito -->
     <div id="status" style="font-size: 14px; color: #6b7280; margin-left: 10px;">● Disconnesso</div>
   </div>
 
   <div class="card">
-    <!-- ID necessari per il funzionamento del pulsante -->
-    <button id="connectButton">Connetti Wallet</button>
+    <button id="connectButton">Connetti Wallet</button> <!-- Aggiunto ID -->
     <p style="font-size: 14px; margin-top: 10px;"><b>Wallet:</b> <span id="wallet">-</span></p>
   </div>
 
   <div class="card">
     <h2>Saldo</h2>
-    <!-- Utilizza la tua classe CSS .balance -->
     <div class="balance" id="balance">0.00</div>
-    <!-- Utilizza la tua classe CSS .usd -->
     <div class="usd" id="usdValue">$0.00 USD</div>
-    <!-- ID necessari per il funzionamento del pulsante -->
-    <button id="addTokenButton">🪙 Aggiungi Logo al Wallet</button>
+    <button id="addTokenButton">🪙 Aggiungi Logo al Wallet</button> <!-- Aggiunto ID -->
   </div>
 
   <div class="card">
-    <h2>Invia USDT Didattici</h2>
-    <!-- ID necessari per gli input e il pulsante -->
+    <h2>Invia USDT</h2> <!-- Titolo pulito -->
     <input id="to" placeholder="Indirizzo destinatario" />
     <input id="amount" placeholder="Quantità" />
-    <button id="sendButton">Invia</button>
+    <button id="sendButton">Invia</button> <!-- Aggiunto ID -->
   </div>
 </div>
 <script src="app.js"></script>

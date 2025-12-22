@@ -44,7 +44,7 @@ async function connectWallet() {
     if (!accs || accs.length === 0) throw new Error("Nessun account restituito.");
     
     provider = new ethers.BrowserProvider(window.ethereum);
-    account = accs[0];
+    account = accs;
 
     const network = await provider.getNetwork();
     
@@ -54,9 +54,7 @@ async function connectWallet() {
         window.location.reload(); return;
       } catch (switchError) {
         if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{ chainId: SEPOLIA_CHAIN_ID_HEX, chainName: 'Sepolia Test Network', rpcUrls: ['rpc.ankr.com'], nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 }, blockExplorerUrls: ['https://sepolia.etherscan.io']}]});
+          alert("Per favore, aggiungi la rete Sepolia manualmente nel tuo Wallet.");
         } else {
             alert("Per favore cambia rete manualmente nel tuo wallet."); return;
         }
@@ -108,7 +106,6 @@ async function sendUSDT() {
   const amount = document.getElementById("amount").value;
   if (!ethers.isAddress(to)) { alert("Indirizzo non valido"); return; }
   if (!amount || parseFloat(amount) <= 0) { alert("Quantità non valida"); return; }
-
   try {
     const value = ethers.parseUnits(amount, USDT_DECIMALS);
     const tx = await usdt.transfer(to, value);
@@ -121,19 +118,19 @@ async function sendUSDT() {
 
 // --- Associazioni Eventi ---
 window.addEventListener("DOMContentLoaded", () => {
+    // Collega gli ID dei pulsanti alle funzioni JavaScript
     document.getElementById("connectButton").addEventListener("click", connectWallet);
     document.getElementById("sendButton").addEventListener("click", sendUSDT);
     document.getElementById("addTokenButton").addEventListener("click", addTokenToWallet);
+    document.getElementById("btnMobileOpen").addEventListener("click", openInWallet);
     
-    // Tenta riconnessione automatica al caricamento se già autorizzato
     if (window.ethereum) {
+        window.ethereum.on('accountsChanged', () => window.location.reload());
+        window.ethereum.on('chainChanged', () => window.location.reload());
+        
+        // Tenta la riconnessione automatica al caricamento
         window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
             if (accounts.length > 0) connectWallet();
         });
     }
 });
-
-if (window.ethereum) {
-    window.ethereum.on('accountsChanged', () => window.location.reload());
-    window.ethereum.on('chainChanged', () => window.location.reload());
-}

@@ -1,42 +1,34 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Tether Wallet</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script src="cdn.jsdelivr.net"></script>
-<link rel="stylesheet" href="style.css"> <!-- Assicurati che il tuo file CSS si chiami style.css -->
+    <meta charset="UTF-8" />
+    <title>Tether Wallet (Sepolia)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
+    <script src="cdn.jsdelivr.net"></script>
 </head>
 <body>
-<div class="app">
-
-  <button id="btnMobileOpen" style="margin-bottom: 20px;">📱 Apri nel Wallet App</button>
-
-  <div class="header">
-    <img src="cryptologos.cc" alt="USDT Logo">
-    <h1>Tether Wallet</h1>
-    <div id="status" style="font-size: 14px; color: #6b7280; margin-left: 10px;">● Disconnesso</div>
-  </div>
-
-  <div class="card">
-    <button id="connectButton">Connetti Wallet</button>
-    <p style="font-size: 14px; margin-top: 10px;"><b>Wallet:</b> <span id="wallet">-</span></p>
-  </div>
-
-  <div class="card">
-    <h2>Saldo</h2>
-    <div class="balance" id="balance">0.00</div>
-    <div class="usd" id="usdValue">$0.00 USD</div>
-    <button id="addTokenButton">🪙 Aggiungi Logo al Wallet</button>
-  </div>
-
-  <div class="card">
-    <h2>Invia USDT</h2>
-    <input id="to" placeholder="Indirizzo destinatario" />
-    <input id="amount" placeholder="Quantità" />
-    <button id="sendButton">Invia</button>
-  </div>
-</div>
-<script src="app.js"></script>
+    <div class="app">
+        <div class="header">
+            <img src="cryptologos.cc" alt="USDT Logo">
+            <h1>Tether Wallet</h1>
+        </div>
+        <div class="card">
+            <button id="connectButton" class="btn-primary" onclick="connectWallet()">Connect Wallet</button>
+            <p><b>Wallet:</b> <span id="wallet">Non Connesso</span></p>
+        </div>
+        <div class="card">
+            <h3>Balance (USDT)</h3>
+            <div class="balance" id="balance">0.00</div>
+            <div id="usdValue">$0.00 USD</div>
+        </div>
+        <div class="card">
+            <h3>Send USDT</h3>
+            <input id="to" placeholder="Recipient address (0x...)" disabled />
+            <input id="amount" type="number" placeholder="Amount" disabled />
+            <button id="sendButton" class="btn-primary" onclick="sendUSDT()" disabled>Send</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>

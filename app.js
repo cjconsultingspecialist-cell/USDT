@@ -34,35 +34,43 @@ async function connectWallet() {
     return;
   }
 
-  provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = await provider.getSigner();
-  account = await signer.getAddress();
+  try {
+    provider = new ethers.BrowserProvider(window.ethereum);
+    // Questo attiva la richiesta di connessione
+    const accs = await provider.send("eth_requestAccounts", []);
+    account = accs[0]; // Assicurati di prendere il primo account
 
-  const network = await provider.getNetwork();
+    // Controlla la rete
+    const network = await provider.getNetwork();
 
-  if (network.chainId !== SEPOLIA_CHAIN_ID_DEC) {
-    try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
-      });
-      // Ricarica la pagina dopo il cambio di rete
-      window.location.reload(); 
-    } catch (err) {
-      alert("Please switch to Sepolia network in your Wallet");
+    if (network.chainId !== SEPOLIA_CHAIN_ID_DEC) {
+        try {
+            await window.ethereum.request({
+                method: "wallet_switchEthereumChain",
+                params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
+            });
+            // Dopo lo switch, la pagina si ricaricherà automaticamente grazie all'event listener
+        } catch (err) {
+            alert("Per favore, cambia manualmente la rete in Sepolia nel tuo Wallet.");
+            return; // Ferma l'esecuzione se l'utente non cambia rete
+        }
     }
+
+    signer = await provider.getSigner();
+    
+    // Aggiorna l'interfaccia
+    document.getElementById("wallet").innerText = account.slice(0, 6) + "..." + account.slice(-4);
+    document.getElementById("status").innerText = "● Connesso (Sepolia)";
+    document.getElementById("status").style.color = "#26a17b";
+    document.getElementById("btnMobileOpen").style.display = "none";
+
+    usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+    updateUI();
+
+  } catch (error) {
+    console.error("Errore connessione:", error);
+    alert("Connessione rifiutata.");
   }
-
-  document.getElementById("wallet").innerText =
-    account.slice(0, 6) + "..." + account.slice(-4);
-  document.getElementById("status").innerText = "● Connesso (Sepolia)";
-  document.getElementById("status").style.color = "#26a17b";
-  document.getElementById("btnMobileOpen").style.display = "none";
-
-
-  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-  updateUI();
 }
 
 // Funzione per aggiungere il logo al wallet (permette visualizzazione nella schermata principale)
@@ -77,7 +85,7 @@ async function addTokenToWallet() {
                     address: USDT_ADDRESS,
                     symbol: 'USDT',
                     decimals: USDT_DECIMALS,
-                    image: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+                    image: 'cryptologos.cc',
                 },
             },
         });
@@ -88,6 +96,7 @@ async function addTokenToWallet() {
 
 
 async function updateUI() {
+  if (!usdt || !account) return;
   const raw = await usdt.balanceOf(account);
   const balance = Number(ethers.formatUnits(raw, USDT_DECIMALS));
 
@@ -113,11 +122,21 @@ async function sendUSDT() {
   updateUI();
 }
 
-// Nasconde il pulsante mobile se si è già nel browser del wallet
-window.addEventListener('load', () => {
-    if (window.ethereum) {
-        document.getElementById("btnMobileOpen").style.display = "none";
-        // Tenta la connessione automatica se già autorizzato
-        connectWallet();
-    }
-});
+// *** GESTIONE EVENTI (IL FIX PER IL LOOP) ***
+
+// Questi listener ricaricano la pagina quando l'utente cambia account o rete nel wallet
+// Questo è il modo standard per gestire la riconnessione in modo pulito.
+if (window.ethereum) {
+    window.ethereum.on("accountsChanged", () => location.reload());
+    window.ethereum.on("chainChanged", () => location.reload());
+    
+    // Al caricamento, nascondi il pulsante mobile se siamo già nel browser del wallet
+    window.addEventListener('load', () => {
+        if (window.ethereum) {
+            const mobileBtn = document.getElementById("btnMobileOpen");
+            if (mobileBtn) mobileBtn.style.display = "none";
+            // Tenta la connessione automatica se già autorizzato
+            connectWallet();
+        }
+    });
+}

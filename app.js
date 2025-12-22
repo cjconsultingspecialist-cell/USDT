@@ -96,7 +96,7 @@ async function updateUI() {
   try {
     const rawBalance = await usdt.balanceOf(account);
     const balance = Number(ethers.formatUnits(rawBalance, USDT_DECIMALS));
-    document.getElementById("balance").innerText = balance.toFixed(2) + " USDT";
+    document.getElementById("balance").innerText = balance.toFixed(2);
     document.getElementById("usdValue").innerText = "$" + balance.toFixed(2) + " USD";
   } catch (e) { console.warn("Errore lettura saldo:", e); }
 }
@@ -116,9 +116,7 @@ async function sendUSDT() {
   } catch (error) { alert("Errore nell'invio. Assicurati di avere ETH Sepolia per il gas."); }
 }
 
-// --- Associazioni Eventi ---
 window.addEventListener("DOMContentLoaded", () => {
-    // Collega gli ID dei pulsanti alle funzioni JavaScript
     document.getElementById("connectButton").addEventListener("click", connectWallet);
     document.getElementById("sendButton").addEventListener("click", sendUSDT);
     document.getElementById("addTokenButton").addEventListener("click", addTokenToWallet);

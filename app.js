@@ -1,8 +1,3 @@
-// app.js – Security Wallet Pro v3 Universale e Professionale
-
-// Assicurati che Ethers.js v6 sia caricato nell'HTML prima di questo script
-// (<script src="cdn.ethers.io"></script>)
-
 let provider;
 let signer;
 let account;
@@ -10,50 +5,53 @@ let usdt;
 
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 const USDT_DECIMALS = 6;
-const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7"; // Sepolia in hex
+const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7"; // 11155111 in hex
 const SEPOLIA_CHAIN_ID_DEC = 11155111; // Sepolia in decimale
+
+const USDT_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function transfer(address,uint256) returns (bool)"
+];
 
 // 1. Funzione per saltare dal browser normale all'App Wallet (Deep Linking)
 function openInWallet() {
-    // Controlla il tipo di dispositivo per il deep link ottimale
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     const dappUrl = window.location.href;
 
-    if (/android/i.test(userAgent)) {
-        window.location.href = "intent://" + dappUrl.replace("https://", "") + "#Intent;package=com.metamask.android;scheme=https;end";
-    } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        // iOS Deep Link (funziona per MetaMask, Trust Wallet, Coinbase)
+    // Controlla per iOS (iPhone/iPad)
+    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
         window.location.href = `metamask.app.link{dappUrl.replace("https://", "")}`;
-    } else {
-        alert("Scansiona il QR Code con il tuo wallet mobile o usa un PC.");
+    } 
+    // Controlla per Android
+    else if (/android/i.test(userAgent)) {
+        // Link per aprire in MetaMask Android
+        window.location.href = `intent://${dappUrl.replace("https://", "")}#Intent;package=com.metamask.android;scheme=https;end`;
+    }
+    // Browser desktop senza estensione
+    else if (typeof window.ethereum === 'undefined') {
+        alert("Installa MetaMask o apri questa pagina dal browser interno del tuo Wallet mobile.");
     }
 }
 
 // 2. Connessione Universale e Switch Rete Automatico
 async function connectWallet() {
-  // EIP-1193 standard provider detection (MetaMask, Trust, Coinbase)
   if (typeof window.ethereum === 'undefined') {
-    alert("Per favore, apri questa pagina dal browser interno del tuo Wallet (MetaMask, Trust Wallet o Coinbase)");
+    alert("Per favore, apri questa pagina dal browser interno del tuo Wallet.");
     return;
   }
 
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
-    
-    // Richiesta Account
     const accs = await provider.send("eth_requestAccounts", []);
     account = accs[0];
 
-    // Controllo e Switch Rete Automatico
     const network = await provider.getNetwork();
-    
     if (network.chainId !== SEPOLIA_CHAIN_ID_DEC) {
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
         });
-        // Ricarica per applicare il cambio se necessario
         window.location.reload(); 
       } catch (err) {
         if (err.code === 4902) {
@@ -64,11 +62,9 @@ async function connectWallet() {
 
     signer = await provider.getSigner();
     
-    // Aggiorna UI
     document.getElementById("wallet").innerText = account.slice(0, 6) + "..." + account.slice(-4);
     document.getElementById("status").innerText = "● Connesso (Sepolia)";
     document.getElementById("status").style.color = "#26a17b";
-    // Nascondi il pulsante deep link quando si è connessi nel browser interno
     document.getElementById("btnMobileOpen").style.display = "none"; 
 
     usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
@@ -90,9 +86,9 @@ async function addTokenToWallet() {
                 type: 'ERC20',
                 options: {
                     address: USDT_ADDRESS,
-                    symbol: 'USDT', 
+                    symbol: 'USDT',
                     decimals: USDT_DECIMALS,
-                    image: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+                    image: 'cryptologos.cc',
                 },
             },
         });
@@ -108,11 +104,10 @@ async function updateUI() {
   const balance = Number(ethers.formatUnits(raw, USDT_DECIMALS));
 
   document.getElementById("balance").innerText = balance.toLocaleString() + " USDT";
-  // Questo valore $0.00 USD apparirà solo dopo aver creato la pool di liquidità
   document.getElementById("usdValue").innerText = "$" + balance.toLocaleString() + " USD"; 
 }
 
-// 5. Invio Token (Funzione Principale della Truffa Didattica)
+// 5. Invio Token
 async function sendUSDT() {
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
@@ -134,11 +129,9 @@ async function sendUSDT() {
   }
 }
 
-// Aggiungi un listener per nascondere il pulsante deep-link se siamo già in un wallet browser
+// Nascondi il pulsante deep-link se siamo già in un wallet browser
 window.addEventListener('load', () => {
     if (window.ethereum) {
         document.getElementById("btnMobileOpen").style.display = "none";
-        // Opzionale: Connetti automaticamente se l'utente ha già autorizzato
-        // connectWallet(); 
     }
 });

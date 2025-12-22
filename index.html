@@ -1,92 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether Wallet</title>
+  <title>Tether Wallet | Academy Pro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <!-- Ethers v6 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
 
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f5f6f8;
-      margin: 0;
-      padding: 20px;
-    }
-    .app {
-      max-width: 420px;
-      margin: auto;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .header img {
-      width: 64px;
-      margin-bottom: 10px;
-    }
-    h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .btn-primary {
-      background: #26a17b;
-      color: #fff;
-    }
-    .balance {
-      font-size: 26px;
-      font-weight: bold;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      margin-bottom: 10px;
-      font-size: 15px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f6f8; margin: 0; padding: 20px; color: #333; }
+    .app { max-width: 420px; margin: auto; }
+    .card { background: #ffffff; border-radius: 20px; padding: 25px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border: 1px solid #eaeaea; }
+    .header { text-align: center; margin-bottom: 25px; }
+    .header img { width: 70px; margin-bottom: 10px; filter: drop-shadow(0 4px 8px rgba(38,161,123,0.3)); }
+    h1 { margin: 0; font-size: 24px; color: #1a1a1a; }
+    button { width: 100%; padding: 16px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
+    .btn-primary { background: #26a17b; color: #fff; }
+    .btn-primary:hover { background: #1e8565; transform: translateY(-1px); }
+    .btn-outline { background: transparent; border: 2px solid #26a17b; color: #26a17b; }
+    .btn-deep-link { background: #007aff; color: white; margin-bottom: 15px; } /* Blu iOS */
+    .balance { font-size: 32px; font-weight: 800; color: #1a1a1a; margin-top: 10px; }
+    #usdValue { color: #26a17b; font-weight: 600; font-size: 18px; }
+    input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 16px; box-sizing: border-box; }
+    .wallet-info { font-family: monospace; color: #666; font-size: 14px; margin-top: 10px; }
+    #status { font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
   </style>
 </head>
 
 <body>
   <div class="app">
+    <!-- Pulsante visibile solo su browser mobile normali (Safari/Chrome) -->
+    <button id="btnMobileOpen" class="btn-deep-link" onclick="openInWallet()">📱 Apri in MetaMask / Trust</button>
+
     <div class="header">
       <img src="https://cryptologos.cc/logos/tether-usdt-logo.png">
-      <h1>Tether Wallet</h1>
+      <h1>Tether Academy Wallet</h1>
+      <div id="status" style="color: #e74c3c;">● Disconnesso</div>
     </div>
 
     <div class="card">
-      <button class="btn-primary" onclick="connectWallet()">Connect Wallet</button>
-      <p><b>Wallet:</b> <span id="wallet">-</span></p>
+      <button class="btn-primary" onclick="connectWallet()">Connetti Wallet</button>
+      <div class="wallet-info">Wallet: <span id="wallet">Non collegato</span></div>
     </div>
 
     <div class="card">
-      <h3>Balance</h3>
+      <span style="color: #666; font-weight: 600;">Saldo Disponibile</span>
       <div class="balance" id="balance">0.00</div>
       <div id="usdValue">$0.00 USD</div>
+      <!-- Pulsante fondamentale per far apparire il logo nel wallet -->
+      <button class="btn-outline" onclick="addTokenToWallet()">🪙 Visualizza Logo nel Wallet</button>
     </div>
 
     <div class="card">
-      <h3>Send USDT</h3>
-      <input id="to" placeholder="Recipient address" />
-      <input id="amount" placeholder="Amount" />
-      <button class="btn-primary" onclick="sendUSDT()">Send</button>
+      <h3>Invia USDT (Testnet)</h3>
+      <input id="to" placeholder="Indirizzo destinatario (0x...)" />
+      <input id="amount" type="number" placeholder="Quantità" />
+      <button class="btn-primary" onclick="sendUSDT()">Invia Ora</button>
     </div>
   </div>
 

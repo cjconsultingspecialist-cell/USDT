@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
   <title>Tether Wallet</title>
@@ -8,67 +8,32 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
 
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f5f6f8;
-      margin: 0;
-      padding: 20px;
-    }
-    .app {
-      max-width: 420px;
-      margin: auto;
-    }
-.card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .header img {
-      width: 64px;
-      margin-bottom: 10px;
-    }
-    h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .btn-primary {
-      background: #26a17b;
-      color: #fff;
-    }
-    .balance {
-      font-size: 26px;
-      font-weight: bold;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      margin-bottom: 10px;
-      font-size: 15px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f6f8; margin: 0; padding: 20px; }
+    .app { max-width: 420px; margin: auto; }
+    .card { background: #ffffff; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .header { text-align: center; margin-bottom: 20px; }
+    /* Logo corretto che punta all'immagine online */
+    .header img { width: 64px; margin-bottom: 10px; filter: drop-shadow(0 4px 8px rgba(38,161,123,0.3)); }
+    h1 { margin: 0; font-size: 22px; }
+    button { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 16px; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
+    .btn-primary { background: #26a17b; color: #fff; }
+    .btn-primary:hover { background: #1e8565; transform: translateY(-1px); }
+    .btn-deep-link { background: #007aff; color: white; margin-bottom: 15px; }
+    .balance { font-size: 26px; font-weight: bold; }
+    input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 15px; }
+    #status { font-size: 12px; text-transform: uppercase; font-weight: bold; margin-top: 5px; }
   </style>
 </head>
 
 <body>
   <div class="app">
-<div class="header">
-      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png">
+    <!-- Pulsante per aprire in app mobile -->
+    <button id="btnMobileOpen" class="btn-deep-link" onclick="openInWallet()">📱 Apri in Wallet App</button>
+
+    <div class="header">
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT Logo">
       <h1>Tether Wallet</h1>
+      <div id="status" style="color: #e74c3c;">● Disconnesso</div>
     </div>
 
     <div class="card">
@@ -80,6 +45,8 @@
       <h3>Balance</h3>
       <div class="balance" id="balance">0.00</div>
       <div id="usdValue">$0.00 USD</div>
+      <!-- Pulsante per aggiungere il logo al wallet -->
+      <button class="btn-primary" onclick="addTokenToWallet()">🪙 Add Token to Wallet</button>
     </div>
 
     <div class="card">

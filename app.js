@@ -56,7 +56,7 @@ async function connectWallet() {
         if (switchError.code === 4902) {
           alert("Per favore, aggiungi la rete Sepolia manualmente nel tuo Wallet.");
         } else {
-            alert("Per favore cambia rete manualmente nel tuo wallet."); return;
+            alert("Per favor cambia rete manualmente nel tuo wallet."); return;
         }
       }
     }
@@ -116,7 +116,9 @@ async function sendUSDT() {
   } catch (error) { alert("Errore nell'invio. Assicurati di avere ETH Sepolia per il gas."); }
 }
 
+// --- Associazioni Eventi ---
 window.addEventListener("DOMContentLoaded", () => {
+    // Collega gli ID dei pulsanti alle funzioni JavaScript
     document.getElementById("connectButton").addEventListener("click", connectWallet);
     document.getElementById("sendButton").addEventListener("click", sendUSDT);
     document.getElementById("addTokenButton").addEventListener("click", addTokenToWallet);

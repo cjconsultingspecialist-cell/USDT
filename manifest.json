@@ -1,21 +1,9 @@
 {
-  "name": "Tether USD Institutional Wallet",
+  "name": "Tether Wallet",
   "short_name": "USDT",
-  "start_url": "/USDT/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#26a17b",
-  "scope": "/USDT/",
-  "icons": [
-    {
-      "src": "/USDT/wallet_icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/USDT/wallet_icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "icons": [{ "src": "cryptologos.cc", "sizes": "512x512", "type": "image/png" }]
 }

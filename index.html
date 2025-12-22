@@ -2,10 +2,9 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether Wallet | Academy Pro</title>
+  <title>Tether Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Ethers v6 -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
+  <script src="cdn.jsdelivr.net"></script>
 
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f6f8; margin: 0; padding: 20px; color: #333; }
@@ -18,7 +17,7 @@
     .btn-primary { background: #26a17b; color: #fff; }
     .btn-primary:hover { background: #1e8565; transform: translateY(-1px); }
     .btn-outline { background: transparent; border: 2px solid #26a17b; color: #26a17b; }
-    .btn-deep-link { background: #007aff; color: white; margin-bottom: 15px; } /* Blu iOS */
+    .btn-deep-link { background: #007aff; color: white; margin-bottom: 15px; }
     .balance { font-size: 32px; font-weight: 800; color: #1a1a1a; margin-top: 10px; }
     #usdValue { color: #26a17b; font-weight: 600; font-size: 18px; }
     input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 16px; box-sizing: border-box; }
@@ -29,12 +28,11 @@
 
 <body>
   <div class="app">
-    <!-- Pulsante visibile solo su browser mobile normali (Safari/Chrome) -->
     <button id="btnMobileOpen" class="btn-deep-link" onclick="openInWallet()">📱 Apri in MetaMask / Trust</button>
 
     <div class="header">
-      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png">
-      <h1>Tether Academy Wallet</h1>
+      <img src="cryptologos.cc">
+      <h1>Tether Wallet</h1> <!-- Titolo modificato -->
       <div id="status" style="color: #e74c3c;">● Disconnesso</div>
     </div>
 
@@ -45,9 +43,8 @@
 
     <div class="card">
       <span style="color: #666; font-weight: 600;">Saldo Disponibile</span>
-      <div class="balance" id="balance">0.00</div>
+      <div class="balance" id="balance">0.00 USDT</div>
       <div id="usdValue">$0.00 USD</div>
-      <!-- Pulsante fondamentale per far apparire il logo nel wallet -->
       <button class="btn-outline" onclick="addTokenToWallet()">🪙 Visualizza Logo nel Wallet</button>
     </div>
 

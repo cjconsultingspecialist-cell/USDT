@@ -13,34 +13,43 @@ const USDT_ABI = [
   "function transfer(address,uint256) returns (bool)"
 ];
 
-// Funzione per aprire in app mobile (multi-wallet)
+// Funzione per aprire in app mobile (universale per iOS e Android)
 function openInWallet() {
+    const dappUrl = window.location.href.replace("https://", "");
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    const dappUrl = window.location.href;
 
+    if (window.ethereum) {
+        alert("Sei già connesso all'interno del Wallet. Clicca 'Connetti Wallet' qui sotto.");
+        return;
+    }
+
+    // Logica per iOS (iPhone/iPad)
     if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        window.location.href = `metamask.app.link{dappUrl.replace("https://", "")}`;
-    } else if (/android/i.test(userAgent)) {
-        window.location.href = `intent://${dappUrl.replace("https://", "")}#Intent;package=com.metamask.android;scheme=https;end`;
-    } else if (typeof window.ethereum === 'undefined') {
-        alert("Installa MetaMask o apri questa pagina dal browser interno del tuo Wallet mobile.");
+        window.location.href = `metamask.app.link{dappUrl}`;
+    } 
+    // Logica per Android
+    else if (/android/i.test(userAgent)) {
+        window.location.href = `intent://${dappUrl}#Intent;scheme=https;package=com.metamask.android;end`;
+    } 
+    // Caso Desktop o altro
+    else {
+        alert("Per favore, installa l'estensione MetaMask o apri questa pagina dal browser interno del tuo Wallet mobile.");
     }
 }
 
+
 // Connessione Universale e Switch Rete Automatico
 async function connectWallet() {
-  if (!window.ethereum) {
-    alert("Open this DApp inside a Wallet browser (MetaMask, Trust, Coinbase)");
+  if (typeof window.ethereum === 'undefined') {
+    alert("Per favore, apri questa DApp nel browser interno del tuo Wallet mobile (MetaMask, Trust, Coinbase).");
     return;
   }
 
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
-    // Questo attiva la richiesta di connessione
     const accs = await provider.send("eth_requestAccounts", []);
-    account = accs[0]; // Assicurati di prendere il primo account
+    account = accs[0];
 
-    // Controlla la rete
     const network = await provider.getNetwork();
 
     if (network.chainId !== SEPOLIA_CHAIN_ID_DEC) {
@@ -49,31 +58,32 @@ async function connectWallet() {
                 method: "wallet_switchEthereumChain",
                 params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
             });
-            // Dopo lo switch, la pagina si ricaricherà automaticamente grazie all'event listener
+            location.reload(); 
         } catch (err) {
             alert("Per favore, cambia manualmente la rete in Sepolia nel tuo Wallet.");
-            return; // Ferma l'esecuzione se l'utente non cambia rete
+            return;
         }
     }
 
     signer = await provider.getSigner();
     
-    // Aggiorna l'interfaccia
     document.getElementById("wallet").innerText = account.slice(0, 6) + "..." + account.slice(-4);
     document.getElementById("status").innerText = "● Connesso (Sepolia)";
     document.getElementById("status").style.color = "#26a17b";
-    document.getElementById("btnMobileOpen").style.display = "none";
+    
+    const mobileBtn = document.getElementById("btnMobileOpen");
+    if (mobileBtn) mobileBtn.style.display = "none";
 
     usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
     updateUI();
 
   } catch (error) {
     console.error("Errore connessione:", error);
-    alert("Connessione rifiutata.");
+    alert("Connessione rifiutata dall'utente.");
   }
 }
 
-// Funzione per aggiungere il logo al wallet (permette visualizzazione nella schermata principale)
+// Funzione per aggiungere il logo al wallet
 async function addTokenToWallet() {
     if (!window.ethereum) return;
     try {
@@ -85,7 +95,7 @@ async function addTokenToWallet() {
                     address: USDT_ADDRESS,
                     symbol: 'USDT',
                     decimals: USDT_DECIMALS,
-                    image: 'cryptologos.cc',
+                    image: 'cryptologos.cc', // URL completo e funzionante
                 },
             },
         });
@@ -100,9 +110,7 @@ async function updateUI() {
   const raw = await usdt.balanceOf(account);
   const balance = Number(ethers.formatUnits(raw, USDT_DECIMALS));
 
-  document.getElementById("balance").innerText = balance.toFixed(2);
-  document.getElementById("usdValue").innerText =
-    "$" + balance.toFixed(2) + " USD";
+  document.getElementById("balance").innerText = balance.toFixed(2) + " USDT";
 }
 
 async function sendUSDT() {
@@ -110,32 +118,37 @@ async function sendUSDT() {
   const amount = document.getElementById("amount").value;
 
   if (!ethers.isAddress(to)) {
-    alert("Invalid address");
+    alert("Indirizzo non valido");
     return;
   }
+  if (!amount || parseFloat(amount) <= 0) {
+      alert("Inserisci una quantità valida");
+      return;
+  }
 
-  const value = ethers.parseUnits(amount, USDT_DECIMALS);
-  const tx = await usdt.transfer(to, value);
-  alert("Transaction sent! Waiting for confirmation...");
-  await tx.wait();
-
-  updateUI();
+  try {
+    const value = ethers.parseUnits(amount, USDT_DECIMALS);
+    const tx = await usdt.transfer(to, value);
+    alert("Transazione inviata! In attesa di conferma...");
+    await tx.wait();
+    updateUI();
+    alert("Transazione completata!");
+  } catch (error) {
+      console.error(error);
+      alert("Errore nell'invio della transazione. Controlla i fondi o il gas.");
+  }
 }
 
-// *** GESTIONE EVENTI (IL FIX PER IL LOOP) ***
+// *** GESTIONE EVENTI (Ricarica automatica per pulizia) ***
 
-// Questi listener ricaricano la pagina quando l'utente cambia account o rete nel wallet
-// Questo è il modo standard per gestire la riconnessione in modo pulito.
 if (window.ethereum) {
     window.ethereum.on("accountsChanged", () => location.reload());
     window.ethereum.on("chainChanged", () => location.reload());
     
-    // Al caricamento, nascondi il pulsante mobile se siamo già nel browser del wallet
     window.addEventListener('load', () => {
         if (window.ethereum) {
             const mobileBtn = document.getElementById("btnMobileOpen");
             if (mobileBtn) mobileBtn.style.display = "none";
-            // Tenta la connessione automatica se già autorizzato
             connectWallet();
         }
     });

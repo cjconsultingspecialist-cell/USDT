@@ -1,3 +1,8 @@
+/**
+ * app.js - Versione Professionale Universale 2025
+ * Gestisce: Deep Linking, Multi-Wallet, Switch Rete Sepolia e Token EDU
+ */
+
 let provider;
 let signer;
 let account;
@@ -6,8 +11,8 @@ let usdt;
 // --- CONFIGURAZIONE ---
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 const USDT_DECIMALS = 6;
-const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7"; 
-const SEPOLIA_CHAIN_ID_DEC = 11155111;
+const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7"; // 11155111 in hex
+const SEPOLIA_CHAIN_ID_DEC = 11155111; 
 
 const USDT_ABI = [
   "function balanceOf(address) view returns (uint256)",
@@ -21,95 +26,103 @@ function openInWallet() {
     const dappUrl = window.location.href.replace("https://", "");
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-    // Se siamo già in un browser wallet, non serve il deep link
+    // Se siamo già in un browser wallet, window.ethereum esiste
     if (window.ethereum) {
         alert("Sei già all'interno del Wallet. Clicca su 'Connetti Wallet'.");
         return;
     }
 
+    // Logica per iOS (iPhone/iPad)
     if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        // iOS: Apre MetaMask o Trust Wallet (tramite link universale)
         window.location.href = `metamask.app.link{dappUrl}`;
-    } else if (/android/i.test(userAgent)) {
-        // Android: Usa il protocollo Intent
+    } 
+    // Logica per Android
+    else if (/android/i.test(userAgent)) {
         window.location.href = `intent://${dappUrl}#Intent;scheme=https;package=com.metamask.android;end`;
-    } else {
-        alert("Per favore, apri questo sito dal browser interno del tuo Wallet (MetaMask, Trust, Coinbase).");
+    } 
+    // Desktop o altri
+    else {
+        alert("Per favore, apri questa pagina dal browser interno del tuo Wallet mobile (MetaMask, Trust, Coinbase).");
     }
 }
 
 /**
- * 2. CONNESSIONE AL WALLET
+ * 2. CONNESSIONE AL WALLET (Logica Anti-Blocco)
  */
 async function connectWallet() {
-    if (typeof window.ethereum === 'undefined') {
-        // Se l'utente clicca ma non è nel browser del wallet
-        openInWallet();
+  if (typeof window.ethereum === 'undefined') {
+    openInWallet();
+    return;
+  }
+
+  try {
+    // Richiesta esplicita degli account (forza il popup)
+    const accs = await window.ethereum.request({ 
+      method: "eth_requestAccounts" 
+    });
+
+    if (!accs || accs.length === 0) {
+      throw new Error("Nessun account restituito");
+    }
+
+    // Inizializzazione Ethers v6
+    provider = new ethers.BrowserProvider(window.ethereum);
+    account = accs[0];
+
+    // Controllo Rete Sepolia e Switch Automatico
+    const network = await provider.getNetwork();
+    if (Number(network.chainId) !== SEPOLIA_CHAIN_ID_DEC) {
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
+        });
+        window.location.reload(); // Ricarica dopo il cambio rete
         return;
+      } catch (switchError) {
+        // Se la rete Sepolia non è presente, la aggiungiamo
+        if (switchError.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+                chainId: SEPOLIA_CHAIN_ID_HEX,
+                chainName: 'Sepolia Test Network',
+                rpcUrls: ['rpc.ankr.com'],
+                nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 },
+                blockExplorerUrls: ['https://sepolia.etherscan.io']
+            }]
+          });
+        }
+      }
     }
 
-    try {
-        // Richiesta di connessione pulita
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        
-        if (!accounts || accounts.length === 0) {
-            alert("Nessun account trovato. Assicurati che il Wallet sia sbloccato.");
-            return;
-        }
+    signer = await provider.getSigner();
+    usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
 
-        account = accounts[0];
-        provider = new ethers.BrowserProvider(window.ethereum);
+    // Aggiornamento Interfaccia Grafica
+    document.getElementById("wallet").innerText = account.substring(0, 6) + "..." + account.substring(account.length - 4);
+    document.getElementById("status").innerText = "● Connesso";
+    document.getElementById("status").style.color = "#26a17b";
+    
+    const mobileBtn = document.getElementById("btnMobileOpen");
+    if (mobileBtn) mobileBtn.style.display = "none";
 
-        // Controllo Rete Sepolia
-        const network = await provider.getNetwork();
-        if (Number(network.chainId) !== SEPOLIA_CHAIN_ID_DEC) {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }],
-                });
-                // Ricarica per applicare il cambio rete
-                window.location.reload();
-            } catch (switchError) {
-                // Se la rete Sepolia non è presente nel wallet, la aggiungiamo noi
-                if (switchError.code === 4902) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: SEPOLIA_CHAIN_ID_HEX,
-                            chainName: 'Sepolia Test Network',
-                            rpcUrls: ['rpc.ankr.com'],
-                            nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 },
-                            blockExplorerUrls: ['https://sepolia.etherscan.io']
-                        }]
-                    });
-                }
-            }
-        }
+    updateUI();
 
-        signer = await provider.getSigner();
-        usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-
-        // Aggiorna UI
-        document.getElementById("wallet").innerText = account.substring(0, 6) + "..." + account.substring(account.length - 4);
-        document.getElementById("status").innerText = "● Connesso (Sepolia)";
-        document.getElementById("status").style.color = "#26a17b";
-        document.getElementById("btnMobileOpen").style.display = "none";
-
-        updateUI();
-
-    } catch (error) {
-        console.error("Errore di connessione:", error);
-        if (error.code === 4001) {
-            alert("Hai rifiutato la connessione. Per favore, accetta la richiesta nel wallet.");
-        } else {
-            alert("Errore: richiesta di connessione già pendente o rifiutata.");
-        }
+  } catch (error) {
+    console.error("Errore connessione:", error);
+    if (error.code === 4001) {
+      alert("Richiesta rifiutata. Per favore, accetta la connessione nel tuo Wallet.");
+    } else if (error.code === -32002) {
+      alert("C'è già una richiesta pendente nel tuo Wallet. Aprilo e accetta.");
+    } else {
+      alert("Errore di connessione. Assicurati di essere su Rete Sepolia.");
     }
+  }
 }
 
 /**
- * 3. AGGIUNGI LOGO (La funzione per il token didattico)
+ * 3. AGGIUNGI LOGO (Funzione per il Token Didattico)
  */
 async function addTokenToWallet() {
     if (!window.ethereum) return;
@@ -135,41 +148,52 @@ async function addTokenToWallet() {
  * 4. AGGIORNAMENTO SALDO
  */
 async function updateUI() {
-    if (!usdt || !account) return;
-    try {
-        const rawBalance = await usdt.balanceOf(account);
-        const balance = ethers.formatUnits(rawBalance, USDT_DECIMALS);
-        document.getElementById("balance").innerText = parseFloat(balance).toFixed(2) + " USDT";
-        document.getElementById("usdValue").innerText = "$" + parseFloat(balance).toFixed(2) + " USD";
-    } catch (e) {
-        console.warn("Errore lettura saldo:", e);
-    }
+  if (!usdt || !account) return;
+  try {
+    const rawBalance = await usdt.balanceOf(account);
+    const balance = ethers.formatUnits(rawBalance, USDT_DECIMALS);
+    
+    document.getElementById("balance").innerText = parseFloat(balance).toFixed(2) + " USDT";
+    document.getElementById("usdValue").innerText = "$" + parseFloat(balance).toFixed(2) + " USD";
+  } catch (e) {
+    console.warn("Errore lettura saldo:", e);
+  }
 }
 
 /**
  * 5. INVIO TOKEN
  */
 async function sendUSDT() {
-    const to = document.getElementById("to").value;
-    const amount = document.getElementById("amount").value;
+  const to = document.getElementById("to").value;
+  const amount = document.getElementById("amount").value;
 
-    if (!ethers.isAddress(to)) { alert("Indirizzo non valido"); return; }
-    if (!amount || amount <= 0) { alert("Inserisci una quantità valida"); return; }
+  if (!ethers.isAddress(to)) { alert("Indirizzo non valido"); return; }
+  if (!amount || amount <= 0) { alert("Inserisci una quantità valida"); return; }
 
-    try {
-        const value = ethers.parseUnits(amount, USDT_DECIMALS);
-        const tx = await usdt.transfer(to, value);
-        alert("Transazione inviata! Attendi conferma...");
-        await tx.wait();
-        alert("Inviato con successo!");
-        updateUI();
-    } catch (error) {
-        alert("Errore durante l'invio. Controlla il gas (ETH Sepolia).");
-    }
+  try {
+    const value = ethers.parseUnits(amount, USDT_DECIMALS);
+    const tx = await usdt.transfer(to, value);
+    alert("Transazione inviata! Attendi conferma...");
+    await tx.wait();
+    alert("Inviato con successo!");
+    updateUI();
+  } catch (error) {
+    alert("Errore nell'invio. Assicurati di avere ETH Sepolia per il gas.");
+  }
 }
 
-// Listeners per cambi di stato nel Wallet
+/**
+ * 6. GESTIONE EVENTI REAL-TIME
+ */
 if (window.ethereum) {
     window.ethereum.on('accountsChanged', () => window.location.reload());
     window.ethereum.on('chainChanged', () => window.location.reload());
+    
+    // Tenta riconnessione automatica al caricamento se già autorizzato
+    window.addEventListener('load', async () => {
+        const accs = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accs.length > 0) {
+            connectWallet();
+        }
+    });
 }

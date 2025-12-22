@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
 <meta charset="UTF-8" />
-<title>Tether Wallet</title>
+<title>Tether Wallet EDU</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
+<script src="cdn.jsdelivr.net"></script>
 <style>
 body {
 font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -30,6 +30,7 @@ margin-bottom: 20px;
 .header img {
 width: 64px;
 margin-bottom: 10px;
+filter: drop-shadow(0 4px 8px rgba(38,161,123,0.3));
 }
 h1 {
 margin: 0;
@@ -42,10 +43,16 @@ border-radius: 12px;
 border: none;
 font-size: 16px;
 cursor: pointer;
+margin-top: 10px;
 }
 .btn-primary {
 background: #26a17b;
 color: #fff;
+}
+.btn-universal {
+background: #007aff;
+color: white;
+margin-bottom: 15px;
 }
 .balance {
 font-size: 26px;
@@ -59,118 +66,43 @@ border: 1px solid #ddd;
 margin-bottom: 10px;
 font-size: 15px;
 }
-</style>
-</head>
-<body>
-<div class="app">
-<div class="header">
-<img src="https://cryptologos.cc/logos/tether-usdt-logo.png">
-<h1>Tether Wallet</h1>
-</div>
-<div class="card">
-<button class="btn-primary" onclick="connectWallet()">Connect Wallet</button>
-<p><b>Wallet:</b> <span id="wallet">-</span></p>
-</div>
-<div class="card">
-<h3>Balance</h3>
-<div class="balance" id="balance">0.00</div>
-<div id="usdValue">$0.00 USD</div>
-</div>
-<div class="card">
-<h3>Send USDT</h3>
-<input id="to" placeholder="Recipient address" />
-<input id="amount" placeholder="Amount" />
-<button class="btn-primary" onclick="sendUSDT()">Send</button>
-</div>
-</div>
-<script src="app.js"></script>
-</body>
-</html>
-MANIFEST.JSON
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Tether Wallet</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
-<style>
-body {
-font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-background: #f5f6f8;
-margin: 0;
-padding: 20px;
-}
-.app {
-max-width: 420px;
-margin: auto;
-}
-.card {
-background: #ffffff;
-border-radius: 16px;
-padding: 20px;
-margin-bottom: 16px;
-box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-.header {
-text-align: center;
-margin-bottom: 20px;
-}
-.header img {
-width: 64px;
-margin-bottom: 10px;
-}
-h1 {
-margin: 0;
-font-size: 22px;
-}
-button {
-width: 100%;
-padding: 14px;
-border-radius: 12px;
-border: none;
-font-size: 16px;
-cursor: pointer;
-}
-.btn-primary {
-background: #26a17b;
-color: #fff;
-}
-.balance {
-font-size: 26px;
+#status {
+font-size: 12px;
+text-transform: uppercase;
 font-weight: bold;
-}
-input {
-width: 100%;
-padding: 12px;
-border-radius: 10px;
-border: 1px solid #ddd;
-margin-bottom: 10px;
-font-size: 15px;
+margin-top: 5px;
+color: #e74c3c;
 }
 </style>
 </head>
 <body>
 <div class="app">
-<div class="header">
-<img src="https://cryptologos.cc/logos/tether-usdt-logo.png">
-<h1>Tether Wallet</h1>
-</div>
-<div class="card">
-<button class="btn-primary" onclick="connectWallet()">Connect Wallet</button>
-<p><b>Wallet:</b> <span id="wallet">-</span></p>
-</div>
-<div class="card">
-<h3>Balance</h3>
-<div class="balance" id="balance">0.00</div>
-<div id="usdValue">$0.00 USD</div>
-</div>
-<div class="card">
-<h3>Send USDT</h3>
-<input id="to" placeholder="Recipient address" />
-<input id="amount" placeholder="Amount" />
-<button class="btn-primary" onclick="sendUSDT()">Send</button>
-</div>
+  <button id="btnMobileOpen" class="btn-universal" onclick="openInWallet()">📱 Apri nel Wallet App</button>
+
+  <div class="header">
+    <img src="cryptologos.cc" alt="USDT Logo">
+    <h1>Tether Wallet EDU</h1>
+    <div id="status">● Disconnesso</div>
+  </div>
+
+  <div class="card">
+    <button class="btn-primary" id="connectButton">Connetti Wallet</button>
+    <p><b>Wallet:</b> <span id="wallet">-</span></p>
+  </div>
+
+  <div class="card">
+    <h3>Saldo</h3>
+    <div class="balance" id="balance">0.00</div>
+    <div id="usdValue">$0.00 USD</div>
+    <button class="btn-primary" id="addTokenButton">🪙 Aggiungi Logo al Wallet</button>
+  </div>
+
+  <div class="card">
+    <h3>Invia USDT Didattici</h3>
+    <input id="to" placeholder="Indirizzo destinatario" />
+    <input id="amount" placeholder="Quantità" />
+    <button class="btn-primary" id="sendButton">Invia</button>
+  </div>
 </div>
 <script src="app.js"></script>
 </body>

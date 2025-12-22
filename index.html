@@ -2,15 +2,17 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether Wallet</title>
+  <title>Tether Wallet EDU</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="cdn.jsdelivr.net"></script>
+  <!-- Aggiunta della libreria Ethers (necessaria per app.js) -->
+  <script src="cdn.ethers.io"></script>
 
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f6f8; margin: 0; padding: 20px; color: #333; }
     .app { max-width: 420px; margin: auto; }
     .card { background: #ffffff; border-radius: 20px; padding: 25px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border: 1px solid #eaeaea; }
     .header { text-align: center; margin-bottom: 25px; }
+    /* Correzione del link e stile del logo */
     .header img { width: 70px; margin-bottom: 10px; filter: drop-shadow(0 4px 8px rgba(38,161,123,0.3)); }
     h1 { margin: 0; font-size: 24px; color: #1a1a1a; }
     button { width: 100%; padding: 16px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
@@ -28,11 +30,13 @@
 
 <body>
   <div class="app">
+    <!-- Pulsante Deep Link Corretto: reindirizza l'utente nell'app wallet -->
     <button id="btnMobileOpen" class="btn-deep-link" onclick="openInWallet()">📱 Apri in MetaMask / Trust</button>
 
     <div class="header">
-      <img src="cryptologos.cc">
-      <h1>Tether Wallet</h1> <!-- Titolo modificato -->
+      <!-- Immagine corretta che punta al logo online -->
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT Logo">
+      <h1>Tether Wallet EDU</h1>
       <div id="status" style="color: #e74c3c;">● Disconnesso</div>
     </div>
 

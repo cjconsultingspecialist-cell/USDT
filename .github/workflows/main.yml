@@ -1,0 +1,45 @@
+# Questo workflow annulla automaticamente i job precedenti quando ne arriva uno nuovo.
+name: pages-build-deployment
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+# Gestione della concorrenza: annulla i job in corso se ne arriva uno più recente.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Il job "build" (costruzione)
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      # Se hai un comando npm install/build, aggiungilo qui:
+      # - run: npm install
+      # - run: npm run build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Assicurati che questo percorso punti alla root dei tuoi file (index.html, app.js, ecc.)
+          path: './' 
+
+  # Il job "deploy" (pubblicazione)
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment-url.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment-url
+        uses: actions/deploy-pages@v4

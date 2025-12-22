@@ -1,13 +1,17 @@
+/**
+ * app.js - Versione Ultima e Corretta 2025
+ */
+
 let provider;
 let signer;
 let account;
 let usdt;
 
+// --- CONFIGURAZIONE ---
 const USDT_ADDRESS = "0x1eB20Afd64393EbD94EB77FC59a6a24a07f8A93D";
 const USDT_DECIMALS = 6;
-const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7";
-const SEPOLIA_CHAIN_ID_DEC = 11155111;
-
+const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7"; // 11155111 in hex
+const SEPOLIA_CHAIN_ID_DEC = 11155111; 
 const USDT_ABI = [
   "function balanceOf(address) view returns (uint256)",
   "function transfer(address,uint256) returns (bool)"
@@ -44,41 +48,49 @@ async function connectWallet() {
     if (!accs || accs.length === 0) throw new Error("Nessun account restituito.");
     
     provider = new ethers.BrowserProvider(window.ethereum);
-    account = accs;
+    account = accs[0]; // Assicurati di prendere solo il primo account
 
-    const network = await provider.getNetwork();
-    
-    if (Number(network.chainId) !== SEPOLIA_CHAIN_ID_DEC) {
-      try {
-        await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }] });
-        window.location.reload(); return;
-      } catch (switchError) {
-        if (switchError.code === 4902) {
-          alert("Per favore, aggiungi la rete Sepolia manualmente nel tuo Wallet.");
-        } else {
-            alert("Per favor cambia rete manualmente nel tuo wallet."); return;
-        }
-      }
-    }
-
-    signer = await provider.getSigner();
-    usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-
-    updateStatusUI(`Connesso a Sepolia: ${account.slice(0, 6) + "..." + account.slice(-4)}`, "#26a17b");
-    document.getElementById("wallet").innerText = account.slice(0, 6) + "..." + account.slice(-4);
-    
-    const mobileBtn = document.getElementById("btnMobileOpen");
-    if (mobileBtn) mobileBtn.style.display = "none";
-
-    updateUI();
+    // FORZA LO SWITCH DELLA RETE
+    await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
+    });
+    // Se lo switch ha successo, la pagina si ricaricherà automaticamente grazie al listener in basso
 
   } catch (error) {
     console.error("Errore Dettagliato:", error);
     updateStatusUI("Disconnesso", "#e74c3c");
     if (error.code === 4001) alert("Hai rifiutato la connessione.");
+    else if (error.code === 4902) alert("Rete Sepolia non trovata. Aggiungila manualmente."); // Codice per rete non trovata
     else if (error.code === -32002) alert("Richiesta pendente. Controlla il Wallet.");
     else alert("Errore di connessione. Assicurati di essere su Rete Sepolia.");
   }
+}
+
+// Questa funzione viene chiamata dopo che la pagina si ricarica in automatico con la rete giusta
+async function initDApp() {
+    if (typeof window.ethereum === 'undefined') return;
+
+    provider = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+
+    if (Number(network.chainId) === SEPOLIA_CHAIN_ID_DEC) {
+        // Se la rete è corretta, procedi a inizializzare il contratto e l'UI
+        const accs = await provider.send("eth_accounts", []);
+        if (accs.length > 0) {
+            account = accs[0];
+            signer = await provider.getSigner();
+            usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+
+            updateStatusUI(`Connesso a Sepolia: ${account.slice(0, 6) + "..." + account.slice(-4)}`, "#26a17b");
+            document.getElementById("wallet").innerText = account.slice(0, 6) + "..." + account.slice(-4);
+            const mobileBtn = document.getElementById("btnMobileOpen");
+            if (mobileBtn) mobileBtn.style.display = "none";
+            updateUI();
+        }
+    } else {
+        updateStatusUI("Rete non corretta", "#e74c3c");
+    }
 }
 
 async function addTokenToWallet() {
@@ -122,12 +134,11 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("addTokenButton").addEventListener("click", addTokenToWallet);
     document.getElementById("btnMobileOpen").addEventListener("click", openInWallet);
     
-    if (window.ethereum) {
-        window.ethereum.on('accountsChanged', () => window.location.reload());
-        window.ethereum.on('chainChanged', () => window.location.reload());
-        
-        window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-            if (accounts.length > 0) connectWallet();
-        });
-    }
+    // Inizializza la DApp al caricamento
+    initDApp();
 });
+
+if (window.ethereum) {
+    window.ethereum.on('accountsChanged', () => window.location.reload());
+    window.ethereum.on('chainChanged', () => window.location.reload());
+}

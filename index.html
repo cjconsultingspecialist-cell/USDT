@@ -77,7 +77,8 @@ color: #e74c3c;
 </head>
 <body>
 <div class="app">
-  <button id="btnMobileOpen" class="btn-universal" onclick="openInWallet()">📱 Apri nel Wallet App</button>
+  <!-- Pulsante per aprire in app mobile -->
+  <button id="btnMobileOpen" class="btn-universal">📱 Apri nel Wallet App</button>
 
   <div class="header">
     <img src="cryptologos.cc" alt="USDT Logo">
@@ -94,6 +95,7 @@ color: #e74c3c;
     <h3>Saldo</h3>
     <div class="balance" id="balance">0.00</div>
     <div id="usdValue">$0.00 USD</div>
+    <!-- ID necessari per il funzionamento del pulsante -->
     <button class="btn-primary" id="addTokenButton">🪙 Aggiungi Logo al Wallet</button>
   </div>
 
@@ -101,6 +103,7 @@ color: #e74c3c;
     <h3>Invia USDT Didattici</h3>
     <input id="to" placeholder="Indirizzo destinatario" />
     <input id="amount" placeholder="Quantità" />
+    <!-- ID necessari per il funzionamento del pulsante -->
     <button class="btn-primary" id="sendButton">Invia</button>
   </div>
 </div>

@@ -4,13 +4,40 @@
 <meta charset="UTF-8" />
 <title>Tether Wallet</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script src="cdn.jsdelivr.net"></script>
-<link rel="stylesheet" href="style.css"> <!-- Assicurati che il tuo file CSS si chiami style.css -->
+<link rel="stylesheet" href="style.css"> <!-- Il tuo file style.css -->
+
+<!-- WalletConnect AppKit CDN -->
+<script type="module">
+  import { createAppKit } from 'cdn.jsdelivr.net'
+
+  // --- CONFIGURAZIONE WALLETCONNECT ---
+  const projectId = 'INSERISCI_QUI_IL_TUO_PROJECT_ID'; // <-- INSERISCI IL TUO ID QUI
+
+  const networks = [{
+    id: 'eip155:11155111', // Sepolia Chain ID
+    name: 'Sepolia',
+    currency: 'ETH',
+    explorerUrl: 'https://sepolia.etherscan.io',
+    rpcUrl: 'rpc.ankr.com'
+  }];
+
+  const modal = createAppKit({
+    adapters: [], 
+    networks,
+    projectId,
+    themeMode: 'light',
+    themeVariables: { '--w3m-accent': '#26A17B' }
+  });
+
+  // Espone il modal per usarlo nel pulsante HTML
+  window.openConnectModal = () => modal.open();
+</script>
 </head>
 <body>
 <div class="app">
 
-  <button id="btnMobileOpen" style="margin-bottom: 20px;">📱 Apri nel Wallet App</button>
+  <!-- Pulsante di connessione universale -->
+  <button id="connectButton" onclick="openConnectModal()">Connetti Wallet Universale</button>
 
   <div class="header">
     <img src="cryptologos.cc" alt="USDT Logo">
@@ -19,7 +46,7 @@
   </div>
 
   <div class="card">
-    <button id="connectButton">Connetti Wallet</button>
+    <!-- Le informazioni del wallet appariranno qui -->
     <p style="font-size: 14px; margin-top: 10px;"><b>Wallet:</b> <span id="wallet">-</span></p>
   </div>
 

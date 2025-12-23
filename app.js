@@ -25,7 +25,6 @@ async function connectWallet() {
     account = await signer.getAddress();
 
     const network = await provider.getNetwork();
-
     if (network.chainId !== SEPOLIA_CHAIN_ID) {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
@@ -34,22 +33,25 @@ async function connectWallet() {
       return;
     }
 
-    // ✅ WALLET VISUALIZZATO CORRETTAMENTE (UNA SOLA VOLTA)
     document.getElementById("wallet").innerText =
       account.slice(0, 6) + "..." + account.slice(-4);
 
-    usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+    document.getElementById("status").innerText =
+      "● Connesso a Sepolia: " + account.slice(0, 6) + "..." + account.slice(-4);
 
-    await updateUI();
+    document.getElementById("status").classList.remove("disconnected");
+    document.getElementById("status").classList.add("connected");
+
+    usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+    updateUI();
+
   } catch (err) {
-    alert("Errore connessione wallet");
     console.error(err);
+    alert("Errore connessione wallet");
   }
 }
 
 async function updateUI() {
-  if (!usdt || !account) return;
-
   const raw = await usdt.balanceOf(account);
   const balance = Number(ethers.formatUnits(raw, USDT_DECIMALS));
 
@@ -59,28 +61,17 @@ async function updateUI() {
 }
 
 async function sendUSDT() {
-  try {
-    const to = document.getElementById("to").value;
-    const amount = document.getElementById("amount").value;
+  const to = document.getElementById("to").value;
+  const amount = document.getElementById("amount").value;
 
-    if (!ethers.isAddress(to)) {
-      alert("Indirizzo non valido");
-      return;
-    }
-
-    if (!amount || Number(amount) <= 0) {
-      alert("Inserisci un importo valido");
-      return;
-    }
-
-    const value = ethers.parseUnits(amount, USDT_DECIMALS);
-    const tx = await usdt.transfer(to, value);
-    await tx.wait();
-
-    await updateUI();
-    alert("Transazione completata");
-  } catch (err) {
-    console.error(err);
-    alert("Errore invio USDT");
+  if (!ethers.isAddress(to)) {
+    alert("Indirizzo non valido");
+    return;
   }
+
+  const value = ethers.parseUnits(amount, USDT_DECIMALS);
+  const tx = await usdt.transfer(to, value);
+  await tx.wait();
+
+  updateUI();
 }

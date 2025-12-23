@@ -1,48 +1,43 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Tether Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
   <div class="app">
-
     <div class="header">
-      <img src="tether_logo.png" alt="Tether USDT" class="logo" />
+      <img src="tether-logo.png" alt="Tether USDT" />
       <h1>Tether Wallet</h1>
-      <div id="status" class="status disconnected">
-        ● Wallet non connesso
-      </div>
     </div>
 
     <div class="card">
-      <button class="btn primary" onclick="connectWallet()">Connetti Wallet</button>
-      <p class="wallet-line">
-        <strong>Wallet:</strong>
-        <span id="wallet">—</span>
-      </p>
+      <button class="btn primary" onclick="connectWallet()">Connect Wallet</button>
+      <p><b>Wallet:</b> <span id="wallet">Not connected</span></p>
     </div>
 
     <div class="card">
-      <h2>Saldo</h2>
+      <h2>Balance</h2>
       <div class="balance" id="balance">0.00</div>
       <div class="usd" id="usdValue">$0.00 USD</div>
     </div>
 
     <div class="card">
-      <h2>Invia USDT</h2>
-      <input id="to" placeholder="Indirizzo destinatario (0x...)" />
-      <input id="amount" placeholder="Quantità" />
-      <button class="btn secondary" onclick="sendUSDT()">Invia</button>
+      <h2>Send USDT</h2>
+      <input id="to" placeholder="Recipient address (0x...)" />
+      <input id="amount" placeholder="Amount" />
+      <button class="btn secondary" onclick="sendUSDT()">Send</button>
     </div>
-
   </div>
 
   <!-- ethers -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
+
   <!-- app -->
   <script src="app.js"></script>
 </body>

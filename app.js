@@ -15,16 +15,18 @@ const USDT_ABI = [
 async function connectWallet() {
   try {
     if (!window.ethereum) {
-      alert("Apri la DApp dal browser di MetaMask");
+      alert("Open this DApp from MetaMask browser");
       return;
     }
 
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
+
     signer = await provider.getSigner();
     account = await signer.getAddress();
 
     const network = await provider.getNetwork();
+
     if (network.chainId !== SEPOLIA_CHAIN_ID) {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
@@ -36,18 +38,12 @@ async function connectWallet() {
     document.getElementById("wallet").innerText =
       account.slice(0, 6) + "..." + account.slice(-4);
 
-    document.getElementById("status").innerText =
-      "● Connesso a Sepolia: " + account.slice(0, 6) + "..." + account.slice(-4);
-
-    document.getElementById("status").classList.remove("disconnected");
-    document.getElementById("status").classList.add("connected");
-
     usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-    updateUI();
 
+    await updateUI();
   } catch (err) {
     console.error(err);
-    alert("Errore connessione wallet");
+    alert("Wallet connection error");
   }
 }
 
@@ -65,7 +61,7 @@ async function sendUSDT() {
   const amount = document.getElementById("amount").value;
 
   if (!ethers.isAddress(to)) {
-    alert("Indirizzo non valido");
+    alert("Invalid address");
     return;
   }
 
@@ -73,5 +69,5 @@ async function sendUSDT() {
   const tx = await usdt.transfer(to, value);
   await tx.wait();
 
-  updateUI();
+  await updateUI();
 }

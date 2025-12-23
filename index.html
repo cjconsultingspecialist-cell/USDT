@@ -1,42 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether Wallet</title>
+  <title>Tether Wallet EDU (Sepolia)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
   <div class="app">
+
+    <!-- HEADER -->
     <div class="header">
-      <img src="wallet_icon.jpg" alt="USDT" />
-      <h1>Tether Wallet</h1>
+      <img src="wallet_icon.jpg" alt="Tether Logo" />
+      <h1>Tether Wallet EDU</h1>
+
+      <!-- STATO RETE -->
+      <div class="status">
+        CONNESSO A SEPOLIA:
+        <span id="wallet">Non connesso</span>
+      </div>
     </div>
 
+    <!-- CONNECT WALLET -->
     <div class="card">
-      <button class="btn primary" id="connectBtn">Connect Wallet</button>
-      <p><b>Wallet:</b> <span id="wallet">Non connesso</span></p>
+      <button class="btn primary" onclick="connectWallet()">
+        Connetti Wallet
+      </button>
     </div>
 
+    <!-- BALANCE -->
     <div class="card">
-      <h2>Balance (USDT)</h2>
-      <div class="balance" id="balance">0.00</div>
+      <h2>Saldo</h2>
+      <div class="balance" id="balance">0.00 USDT</div>
       <div class="usd" id="usdValue">$0.00 USD</div>
+
+      <button class="btn secondary" style="margin-top: 18px;">
+        🪙 Aggiungi Logo al Wallet
+      </button>
     </div>
 
+    <!-- SEND -->
     <div class="card">
-      <h2>Send USDT</h2>
-      <input id="to" placeholder="Recipient address (0x...)" />
-      <input id="amount" placeholder="Amount" />
-      <button class="btn secondary" id="sendBtn">Send</button>
+      <h2>Invia USDT Didattici</h2>
+
+      <input
+        id="to"
+        type="text"
+        placeholder="Indirizzo destinatario"
+      />
+
+      <input
+        id="amount"
+        type="number"
+        placeholder="Quantità"
+      />
+
+      <button class="btn secondary" onclick="sendUSDT()">
+        Invia
+      </button>
     </div>
+
   </div>
 
-  <!-- ethers -->
+  <!-- ETHERS -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
 
-  <!-- app -->
+  <!-- APP -->
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,165 +1,101 @@
-/* =========================
-   RESET + BASE
-========================= */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-  background: #f6f8f7;
+  margin: 0;
+  background: #f5f7f6;
   color: #111;
-  display: flex;
-  justify-content: center;
-  padding: 40px 16px;
 }
 
-/* =========================
-   APP CONTAINER
-========================= */
 .app {
-  width: 100%;
   max-width: 420px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
 }
 
-/* =========================
-   HEADER
-========================= */
 .header {
   text-align: center;
   margin-bottom: 28px;
 }
 
-.header img {
-  width: 72px;
+.logo {
+  width: 64px;
+  height: 64px;
   margin-bottom: 12px;
 }
 
 .header h1 {
-  font-size: 30px;
+  margin: 0;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 8px;
 }
 
 .status {
+  margin-top: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #4f9d7a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
 }
 
-.status::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  background: #4f9d7a;
-  border-radius: 50%;
+.status.connected {
+  color: #26a17b;
 }
 
-/* =========================
-   CARD GENERICA
-========================= */
+.status.disconnected {
+  color: #999;
+}
+
 .card {
   background: #ffffff;
-  border-radius: 22px;
-  padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
 }
 
-/* =========================
-   BUTTONS
-========================= */
 .btn {
   width: 100%;
-  border: none;
-  border-radius: 18px;
-  padding: 18px;
-  font-size: 18px;
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 16px;
   font-weight: 600;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.btn.primary,
+.btn.primary {
+  background: #26a17b;
+  color: #fff;
+}
+
 .btn.secondary {
-  background: #4f9d7a;
-  color: #ffffff;
+  background: #e9eceb;
+  color: #111;
 }
 
-.btn.primary:hover,
-.btn.secondary:hover {
-  background: #438a6b;
-}
-
-/* =========================
-   WALLET INFO
-========================= */
-.card p {
-  margin-top: 18px;
-  font-size: 17px;
-}
-
-.card p b {
-  font-weight: 700;
-}
-
-/* =========================
-   BALANCE
-========================= */
-.card h2 {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 14px;
+.wallet-line {
+  margin-top: 14px;
+  font-size: 15px;
 }
 
 .balance {
-  font-size: 44px;
+  font-size: 42px;
   font-weight: 800;
-  margin-bottom: 6px;
-  letter-spacing: -0.5px;
+  margin-top: 6px;
 }
 
 .usd {
-  font-size: 18px;
+  font-size: 16px;
   color: #555;
+  margin-top: 4px;
 }
 
-/* =========================
-   INPUTS
-========================= */
 input {
   width: 100%;
-  padding: 16px 18px;
-  font-size: 16px;
-  border-radius: 14px;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 12px;
   border: 1px solid #ddd;
-  margin-bottom: 14px;
-}
-
-input:focus {
-  outline: none;
-  border-color: #4f9d7a;
-}
-
-/* =========================
-   MOBILE
-========================= */
-@media (max-width: 420px) {
-  .balance {
-    font-size: 38px;
-  }
-
-  .header h1 {
-    font-size: 26px;
-  }
+  font-size: 15px;
 }

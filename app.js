@@ -12,39 +12,44 @@ const USDT_ABI = [
   "function transfer(address,uint256) returns (bool)"
 ];
 
-document.getElementById("connectBtn").onclick = connectWallet;
-document.getElementById("sendBtn").onclick = sendUSDT;
-
 async function connectWallet() {
-  if (!window.ethereum) {
-    alert("Apri la DApp dal browser di MetaMask");
-    return;
+  try {
+    if (!window.ethereum) {
+      alert("Apri la DApp dal browser di MetaMask");
+      return;
+    }
+
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = await provider.getSigner();
+    account = await signer.getAddress();
+
+    const network = await provider.getNetwork();
+
+    if (network.chainId !== SEPOLIA_CHAIN_ID) {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xaa36a7" }]
+      });
+      return;
+    }
+
+    // ✅ WALLET VISUALIZZATO CORRETTAMENTE (UNA SOLA VOLTA)
+    document.getElementById("wallet").innerText =
+      account.slice(0, 6) + "..." + account.slice(-4);
+
+    usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+
+    await updateUI();
+  } catch (err) {
+    alert("Errore connessione wallet");
+    console.error(err);
   }
-
-  provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = await provider.getSigner();
-  account = await signer.getAddress();
-
-  const network = await provider.getNetwork();
-
-  if (network.chainId !== SEPOLIA_CHAIN_ID) {
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: "0xaa36a7" }]
-    });
-    return;
-  }
-
-  document.getElementById("wallet").innerText =
-    account.slice(0, 6) + "..." + account.slice(-4);
-
-  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-
-  updateUI();
 }
 
 async function updateUI() {
+  if (!usdt || !account) return;
+
   const raw = await usdt.balanceOf(account);
   const balance = Number(ethers.formatUnits(raw, USDT_DECIMALS));
 
@@ -54,17 +59,28 @@ async function updateUI() {
 }
 
 async function sendUSDT() {
-  const to = document.getElementById("to").value;
-  const amount = document.getElementById("amount").value;
+  try {
+    const to = document.getElementById("to").value;
+    const amount = document.getElementById("amount").value;
 
-  if (!ethers.isAddress(to)) {
-    alert("Indirizzo non valido");
-    return;
+    if (!ethers.isAddress(to)) {
+      alert("Indirizzo non valido");
+      return;
+    }
+
+    if (!amount || Number(amount) <= 0) {
+      alert("Inserisci un importo valido");
+      return;
+    }
+
+    const value = ethers.parseUnits(amount, USDT_DECIMALS);
+    const tx = await usdt.transfer(to, value);
+    await tx.wait();
+
+    await updateUI();
+    alert("Transazione completata");
+  } catch (err) {
+    console.error(err);
+    alert("Errore invio USDT");
   }
-
-  const value = ethers.parseUnits(amount, USDT_DECIMALS);
-  const tx = await usdt.transfer(to, value);
-  await tx.wait();
-
-  updateUI();
 }

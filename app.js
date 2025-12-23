@@ -12,38 +12,36 @@ const USDT_ABI = [
   "function transfer(address,uint256) returns (bool)"
 ];
 
+document.getElementById("connectBtn").onclick = connectWallet;
+document.getElementById("sendBtn").onclick = sendUSDT;
+
 async function connectWallet() {
-  try {
-    if (!window.ethereum) {
-      alert("Apri la DApp dal browser di MetaMask");
-      return;
-    }
-
-    provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = await provider.getSigner();
-    account = await signer.getAddress();
-
-    const network = await provider.getNetwork();
-
-    if (network.chainId !== SEPOLIA_CHAIN_ID) {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0xaa36a7" }]
-      });
-      return;
-    }
-
-    document.getElementById("wallet").innerText =
-      account.slice(0, 6) + "..." + account.slice(-4);
-
-    usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-
-    updateUI();
-  } catch (err) {
-    alert("Errore connessione wallet");
-    console.error(err);
+  if (!window.ethereum) {
+    alert("Apri la DApp dal browser di MetaMask");
+    return;
   }
+
+  provider = new ethers.BrowserProvider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  signer = await provider.getSigner();
+  account = await signer.getAddress();
+
+  const network = await provider.getNetwork();
+
+  if (network.chainId !== SEPOLIA_CHAIN_ID) {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0xaa36a7" }]
+    });
+    return;
+  }
+
+  document.getElementById("wallet").innerText =
+    account.slice(0, 6) + "..." + account.slice(-4);
+
+  usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+
+  updateUI();
 }
 
 async function updateUI() {

@@ -2,73 +2,48 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Tether Wallet EDU (Sepolia)</title>
+  <title>Tether Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
   <div class="app">
 
-    <!-- HEADER -->
     <div class="header">
-      <img src="wallet_icon.jpg" alt="Tether Logo" />
-      <h1>Tether Wallet EDU</h1>
-
-      <!-- STATO RETE -->
-      <div class="status">
-        CONNESSO A SEPOLIA:
-        <span id="wallet">Non connesso</span>
+      <img src="tether_logo.png" alt="Tether USDT" class="logo" />
+      <h1>Tether Wallet</h1>
+      <div id="status" class="status disconnected">
+        ● Wallet non connesso
       </div>
     </div>
 
-    <!-- CONNECT WALLET -->
     <div class="card">
-      <button class="btn primary" onclick="connectWallet()">
-        Connetti Wallet
-      </button>
+      <button class="btn primary" onclick="connectWallet()">Connetti Wallet</button>
+      <p class="wallet-line">
+        <strong>Wallet:</strong>
+        <span id="wallet">—</span>
+      </p>
     </div>
 
-    <!-- BALANCE -->
     <div class="card">
       <h2>Saldo</h2>
-      <div class="balance" id="balance">0.00 USDT</div>
+      <div class="balance" id="balance">0.00</div>
       <div class="usd" id="usdValue">$0.00 USD</div>
-
-      <button class="btn secondary" style="margin-top: 18px;">
-        🪙 Aggiungi Logo al Wallet
-      </button>
     </div>
 
-    <!-- SEND -->
     <div class="card">
-      <h2>Invia USDT Didattici</h2>
-
-      <input
-        id="to"
-        type="text"
-        placeholder="Indirizzo destinatario"
-      />
-
-      <input
-        id="amount"
-        type="number"
-        placeholder="Quantità"
-      />
-
-      <button class="btn secondary" onclick="sendUSDT()">
-        Invia
-      </button>
+      <h2>Invia USDT</h2>
+      <input id="to" placeholder="Indirizzo destinatario (0x...)" />
+      <input id="amount" placeholder="Quantità" />
+      <button class="btn secondary" onclick="sendUSDT()">Invia</button>
     </div>
 
   </div>
 
-  <!-- ETHERS -->
+  <!-- ethers -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
-
-  <!-- APP -->
+  <!-- app -->
   <script src="app.js"></script>
 </body>
 </html>

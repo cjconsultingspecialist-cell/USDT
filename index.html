@@ -1,46 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Tether Wallet (Sepolia)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Usa il CSS locale -->
-    <link rel="stylesheet" href="style.css">
-    <script src="cdn.jsdelivr.net"></script>
+  <meta charset="UTF-8" />
+  <title>Tether Wallet (Sepolia)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-    <div class="app">
-        <div class="header">
-            <img src="cryptologos.cc" alt="USDT Logo">
-            <h1>Tether Wallet</h1>
-        </div>
-        
-        <div class="card">
-            <!-- Assegna un ID al pulsante di connessione -->
-            <button id="connectButton" class="btn-primary" onclick="connectWallet()">Connect Wallet</button>
-            <p>
-                <b>Wallet:</b> 
-                <span id="wallet">Non Connesso</span>
-            </p>
-        </div>
-        
-        <div class="card">
-            <h3>Balance (USDT)</h3>
-            <div class="balance" id="balance">0.00</div>
-            <div id="usdValue">$0.00 USD</div>
-        </div>
-        
-        <div class="card">
-            <h3>Send USDT</h3>
-            <!-- Disabilitati di default -->
-            <input id="to" placeholder="Recipient address (0x...)" disabled />
-            <input id="amount" type="number" placeholder="Amount" disabled />
-            <!-- Assegna un ID e disabilita di default -->
-            <button id="sendButton" class="btn-primary" onclick="sendUSDT()" disabled>Send</button>
-        </div>
-    </div>
-    
-    <script src="app.js"></script>
-</body>
-</html>
 
+<body>
+  <div class="app">
+    <div class="header">
+      <img src="wallet_icon.jpg" alt="USDT" />
+      <h1>Tether Wallet</h1>
+    </div>
+
+    <div class="card">
+      <button class="btn primary" onclick="connectWallet()">Connect Wallet</button>
+      <p><b>Wallet:</b> <span id="wallet">Non connesso</span></p>
+    </div>
+
+    <div class="card">
+      <h2>Balance (USDT)</h2>
+      <div class="balance" id="balance">0.00</div>
+      <div class="usd" id="usdValue">$0.00 USD</div>
+    </div>
+
+    <div class="card">
+      <h2>Send USDT</h2>
+      <input id="to" placeholder="Recipient address (0x...)" />
+      <input id="amount" placeholder="Amount" />
+      <button class="btn secondary" onclick="sendUSDT()">Send</button>
+    </div>
+  </div>
+
+  <!-- ✅ ethers PRIMA -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.14.0/dist/ethers.umd.min.js"></script>
+
+  <!-- ✅ app.js DOPO -->
+  <script src="app.j
